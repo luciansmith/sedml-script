@@ -10,7 +10,7 @@ from sed_roadrunner import model, task, plot
 #----------------------------------------------
 
 #Models:
-model1 = model("BIOMD0000000021.xml")
+model1 = model("models/BIOMD0000000021.xml")
 model2 = model1.copy()
 model2.V_mT = 0.28
 model2.V_dT = 4.8

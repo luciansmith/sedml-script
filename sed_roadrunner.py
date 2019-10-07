@@ -97,6 +97,7 @@ class model(AttributeDict):
         self.rr = roadrunner.RoadRunner(self.doc.toSBML())
         self.saveModelElements()
         self.saveRRElements()
+        self['time'] = 0
 
     def setDict(self, key, value):
         self.rr[key] = value
@@ -150,7 +151,7 @@ class model(AttributeDict):
 
     #Functions for SED-ML Script use:
     def uniform(self, start, end, nsteps=0, step=0):
-        print("Running a uniform time course from", start, "to", end)
+        #print("Running a uniform time course from", start, "to", end)
         if nsteps<0:
             raise Exception("Unable to simulate for a negative number of steps (" + str(nsteps) + ").")
         if nsteps > 0:
@@ -161,8 +162,13 @@ class model(AttributeDict):
         else:
             result = self.rr.simulate(start, end, selections=self.outputVariables)
         self.saveRRElements()
+        self.time = end
         return task(ndarray=result, names=self.outputVariables)
-    
+
+    def onestep(self, step):
+        #print("Running one step of a simulation.")
+        return self.uniform(self.time, self.time+step, nsteps=1)
+
 
 class plot:
     def __init__(self, task=None, x=None, ys=None, labels=None):
