@@ -75,6 +75,7 @@ class task(AttributeDict):
 class model(AttributeDict):
     doc = None
     rr = None
+    rr_default_int = None
     outputVariables = None
 
     def __init__(self, string, sbml = None):
@@ -82,6 +83,7 @@ class model(AttributeDict):
         self.knownatts.add("doc")
         self.knownatts.add("rr")
         self.knownatts.add("outputVariables")
+        self.knownatts.add("rr_default_int")
         self.outputVariables = ['time']
         print("This is the constructor method.")
         if isfile(string):
@@ -95,6 +97,7 @@ class model(AttributeDict):
             if self.doc.getModel() == None:
                 raise Exception("Unable to parse string as an SBML model, or file not found.")
         self.rr = roadrunner.RoadRunner(self.doc.toSBML())
+        self.rr_default_int = self.rr.getIntegrator().getName()
         self.saveModelElements()
         self.saveRRElements()
         self['time'] = 0
@@ -150,15 +153,18 @@ class model(AttributeDict):
             self._data[element] = self.rr[element]
 
     #Functions for SED-ML Script use:
-    def uniform(self, start, end, nsteps=0, step=0):
+    def uniform(self, start, end, nsteps=0, step=0, stochastic=False):
         #print("Running a uniform time course from", start, "to", end)
         if nsteps<0:
             raise Exception("Unable to simulate for a negative number of steps (" + str(nsteps) + ").")
+        if stochastic:
+            self.rr.setIntegrator('gillespie')
+        else:
+            self.rr.setIntegrator(self.rr_default_int)
         if nsteps > 0:
             result = self.rr.simulate(start, end, steps=nsteps, selections=self.outputVariables)
         elif step > 0:
-            steps = np.round((end-start)/step)
-            result = self.rr.simulate(start, end, steps=steps, selections=self.outputVariables)
+            result = self.rr.simulate(start, end, steps=np.round((end-start)/step), selections=self.outputVariables)
         else:
             result = self.rr.simulate(start, end, selections=self.outputVariables)
         self.saveRRElements()
