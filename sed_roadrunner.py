@@ -153,20 +153,26 @@ class model(AttributeDict):
             self._data[element] = self.rr[element]
 
     #Functions for SED-ML Script use:
-    def uniform(self, start, end, nsteps=0, step=0, stochastic=False):
+    def uniform(self, start, end, nsteps=0, step=0, stochastic=False, seed=None):
         #print("Running a uniform time course from", start, "to", end)
         if nsteps<0:
             raise Exception("Unable to simulate for a negative number of steps (" + str(nsteps) + ").")
+
         if stochastic:
             self.rr.setIntegrator('gillespie')
         else:
             self.rr.setIntegrator(self.rr_default_int)
+
+        if seed is not None:
+            self.rr.getIntegrator().seed = seed
+
         if nsteps > 0:
             result = self.rr.simulate(start, end, steps=nsteps, selections=self.outputVariables)
         elif step > 0:
             result = self.rr.simulate(start, end, steps=np.round((end-start)/step), selections=self.outputVariables)
         else:
             result = self.rr.simulate(start, end, selections=self.outputVariables)
+
         self.saveRRElements()
         self.time = end
         return task(ndarray=result, names=self.outputVariables)

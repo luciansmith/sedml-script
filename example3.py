@@ -13,7 +13,7 @@ model1.outputVariables = ["time", "MAPK", "MAPK_P", "MAPK_PP", "MKK_P", "MKKK", 
 p1 = plot()
 for x in range(10):
     mod = model1.copy()
-    onesim = mod.uniform(0, 4000, stochastic=True) #, seed = 1003*(x+1))
+    onesim = mod.uniform(0, 4000, stochastic=True, seed = 1003*(x+1))
     output = {}
     for element in onesim:
         out = element
