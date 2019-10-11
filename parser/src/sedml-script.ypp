@@ -1,0 +1,448 @@
+/**
+ * This file is designed to be compiled by the 'bison' program with the
+ * command:
+ *
+ * bison -v sedml-script.ypp -o sedml-script.cpp
+ *
+ * The '-v' creates a file called 'sedml-script.output' which can be examined
+ * to piece together the explicit logic of the parser.  The fact that no
+ * '-o' option is used means that the default output file (sedml-script.tab.cpp)
+ * will be produced.
+ *
+ * This command produces the file 'sedml-script.tab.cpp' which is included
+ * explicitly in the sedml-script distribution.  Automatic creation of this
+ * file is not incorporated into the CMake system; it must be
+ * run by hand before change here will make it into the actual sedml-script
+ * library.
+ *
+ * Bison v2.4.2 was used to create the .cpp file when this file was
+ * first created.  It does not rely on odd features of the bison
+ * parser, so other versions should work fine.
+ *
+ * This file currently compiles with zero reduce/reduce errors and one
+ * shift/reduce warnings.
+ */
+
+%{
+  //#define YYSTYPE double
+#include <cassert>
+#include <ctype.h>
+#include <fstream>
+#include <iostream>
+#include <math.h>
+#include <set>
+#include <stdio.h>
+#include <string>
+#include <vector>
+
+#include "registry.h"
+//#include "module.h"
+//#include "unitdef.h"
+#include "stringx.h"
+//#include "modelChange.h"
+
+  using namespace std;
+  using namespace sedmlscript;
+  int sed_yylex(void);
+  void sed_yyerror(char const *);
+  Registry g_registry;
+  int sed_yylloc_last_line = 1;
+%}
+
+/*Bison declarations */
+%union {
+  char character;
+  const string* word;
+  vector<const string*>* words;
+  vector<string>* wordstr;
+  vector<vector<string>*>* wordstrvec;
+  vector<vector<const string*>* >* nameslist;
+  double number;
+  vector<double>* nums;
+}
+
+%type   <character>     mathThing "mathematical symbol"
+%type   <words>         varOrKeyword 
+%type   <wordstr>       formula commaformula
+%type   <nums>          numlist
+%type   <number>        number
+
+%left '&' '|' /* Boolean functions and, or */
+%left '-' '+'
+%left '*' '/' '%'
+%right '^'    /* exponentiation        */
+
+%token YYEOF 0 "end of file"
+%token  <number> NUM "number"
+%token  <word> SEDWORD "element name"
+%token  <word> TEXTSTRING "text string in quotes"
+%token  <word> ERROR "an error"
+%token  <word> INDENT "an indentation increase"
+%token  <word> DEINDENT "an indentation decrease"
+%token  <word> EQUALS "=="
+
+%define api.prefix {sed_yy}
+%debug
+%error-verbose
+%% /* The grammar: */
+
+input:          /* empty */
+        |       input equals lineend {}
+        |       input block {}
+        |       input name lineend {}
+        |       input lineend {}
+        |       input error {YYABORT;} 
+        |       input ERROR {YYABORT;}
+        ;
+
+varOrKeyword:   SEDWORD {$$ = new vector<const string*>; $$->push_back($1);}
+        |       varOrKeyword '.' SEDWORD {$$ = $1; $$->push_back($3);}
+        ;
+
+equals:         varOrKeyword '=' formula  {if (g_registry.addEquals($1, $3)) YYABORT;}
+        ;
+
+block:          varOrKeyword formula ':' lineend INDENT {if (g_registry.startBlock($1, $2)) YYABORT;} input DEINDENT {if (g_registry.endBlock()) YYABORT;}
+        ;
+
+numlist:        /* empty */ {$$ = new vector<double>;}
+        |       number {$$ = new vector<double>; $$->push_back($1);}
+        |       numlist ',' number {$$ = $1; $$->push_back($3);}
+        ;
+
+name:           varOrKeyword varOrKeyword TEXTSTRING {if (g_registry.setName($1, $2, $3)) YYABORT;}
+        ;
+
+number:         NUM {$$ = $1;}
+        |       '-' NUM {$$ = -$2;}
+        ;
+
+formula:        varOrKeyword {$$ = new vector<string>(); $$->push_back(getStringFrom($1, ".")); }
+        |       NUM {$$ = new vector<string>(); $$->push_back(g_registry.ftoa($1)); }
+        |       '(' formula ')' {$$ = $2; $$->insert($$->begin(), "("); $$->push_back(")"); }
+        |       '-' {$$ = new vector<string>(); $$->push_back("-"); }
+        |       '!' {$$ = new vector<string>(); $$->push_back("!"); }
+        |       formula varOrKeyword {$$ = $1; $$->push_back(getStringFrom($2, ".")); }
+        |       formula NUM  {$$ = $1; $1->push_back(g_registry.ftoa($2)); }
+        |       formula '(' ')' {$$ = $1; $$->push_back("()");}
+        |       formula '(' commaformula ')'
+                {
+                  $$ = $1;
+                  $$->push_back("(");
+                  $$->insert($$->end(), $3->begin(), $3->end());
+                  $$->push_back(")");
+                  delete $3;
+                }
+        |       formula mathThing {$$ = $1; string mt; mt.push_back($2); $1->push_back(mt); }
+        |       formula '&' '&' {$$ = $1; $1->push_back("&&"); }
+        |       formula EQUALS  {$$ = $1; $1->push_back("=="); }
+        |       formula '|' '|' {$$ = $1; $1->push_back("||"); }
+        |       formula '[' numlist ']'
+                {
+                  $$ = $1;
+                  $$->push_back("[");
+                  for (size_t d=0; d<$3->size(); d++) {
+                    $$->push_back(g_registry.ftoa((*$3)[d]));
+                  }
+                  $$->push_back("]");
+                  delete $3;
+                }
+        ;
+
+commaformula:   formula {$$ = $1;}
+        |       commaformula ',' formula {$$ = $1; $$->push_back(","); $$->insert($$->end(), $3->begin(), $3->end()); }
+        ;
+
+mathThing:      '+' {$$ = '+';}
+        |       '-' {$$ = '-';}
+        |       '*' {$$ = '*';}
+        |       '/' {$$ = '/';}
+        |       '^' {$$ = '^';}
+        |       '>' {$$ = '>';}
+        |       '<' {$$ = '<';}
+        |       '!' {$$ = '!';}
+        |       '%' {$$ = '%';}
+        ;
+
+lineend:        '\n' {}
+        ;
+
+%%
+
+
+void sed_yyerror(char const *s)
+{
+  stringstream err;
+  err << "Error in line " << sed_yylloc_last_line << ": " << s;
+  if (g_registry.getError()=="") {
+    g_registry.setError(err.str(), sed_yylloc_last_line);
+  }
+}
+
+int getLastIndent()
+{
+  size_t numIndents = g_registry.indents.size();
+  if (numIndents > 0) {
+    return g_registry.indents[numIndents-1];
+  }
+  return 0;
+}
+
+int sed_yylex(void)
+{
+  //First check to see if we need to immediately return a 'DEINDENT' based on the previous parse.
+  int lastIndent = getLastIndent();
+  if (lastIndent > g_registry.currIndent) {
+    g_registry.indents.pop_back();
+    lastIndent = getLastIndent();
+    if (g_registry.currIndent > lastIndent) {
+      //We didn't de-indent enough:
+      g_registry.setError("The indentation decreased to an indentation level not previously seen.", sed_yylloc_last_line);
+      return ERROR;
+    }
+    return DEINDENT;
+  }
+  char cc = 0;
+  g_registry.input->get(cc);
+
+  //If we're done with the file:
+  if (g_registry.input->eof()) {
+    if (g_registry.indents.size()>0) {
+      g_registry.indents.pop_back();
+      return DEINDENT;
+    }
+    if (g_registry.finalize()) {
+      return ERROR;
+    }
+    return 0;
+  }
+  if (!g_registry.input->good()) {
+    //Something else went wrong!
+    g_registry.setError("Unparseable content in line " + g_registry.ftoa(sed_yylloc_last_line) + ".", sed_yylloc_last_line);
+    return ERROR;
+  }
+
+  // Read white space.
+  if (g_registry.midline) {
+    //Skip whitespace.
+    while ((cc == ' ' ||
+            cc == '\t') &&
+           !g_registry.input->eof()) {
+      g_registry.input->get(cc);
+    }
+    if (g_registry.input->eof()) return sed_yylex();
+  }
+  else {
+    //We're at the beginning of a line: check for indentation change:
+    g_registry.currIndent = 0;
+    while ((cc == ' ' ||
+            cc == '\t') &&
+           !g_registry.input->eof()) {
+      if (cc==' ') {
+        g_registry.currIndent += 1;
+      }
+      if (cc=='\t') {
+        g_registry.currIndent += 4;
+      }
+      g_registry.input->get(cc);
+    }
+    if (cc=='#') {
+      //It's a comment.
+      while (cc != '\n' && !g_registry.input->eof()) {
+        g_registry.input->get(cc);
+        //At some point, maybe save comments?
+      }
+      ++sed_yylloc_last_line;
+      g_registry.currIndent = getLastIndent();
+      return sed_yylex();
+    }
+    if (cc=='\r' || cc=='\n') {
+      //It was a blank line.
+      ++sed_yylloc_last_line;
+      g_registry.currIndent = getLastIndent();
+      return sed_yylex();
+    }
+    //Back up: we parsed all the whitespace.
+    g_registry.input->unget();
+    g_registry.midline = true;
+
+    //Compare this indent with the current suite.
+    int lastIndent = getLastIndent();
+    if (g_registry.currIndent == lastIndent) {
+      //We're good: keep parsing.
+      return sed_yylex();
+    }
+    if (g_registry.currIndent > lastIndent) {
+      //We just increased the indent: return INDENT
+      g_registry.indents.push_back(g_registry.currIndent);
+      return INDENT;
+    }
+    //Otherwise, we decreased the indent.
+    int lastLastIndent = 0;
+    size_t numIndents = g_registry.indents.size();
+    if (numIndents > 1) {
+      lastLastIndent = g_registry.indents[numIndents-2];
+    }
+    if (g_registry.currIndent > lastLastIndent) {
+      //We didn't de-indent enough:
+      g_registry.setError("The indentation decreased to an indentation level not previously seen.", sed_yylloc_last_line);
+      return ERROR;
+    }
+    g_registry.indents.pop_back();
+    return DEINDENT;
+  }
+
+  // Skip carriage returns after '\':
+  if (cc == '\\') {
+    g_registry.input->get(cc);
+    if (cc == '\r' || cc == '\n' || cc == ' ') {
+      while ((cc == '\r' || cc == '\n' || cc == ' ') && !g_registry.input->eof()) {
+        g_registry.input->get(cc);
+      }
+      ++sed_yylloc_last_line;
+      g_registry.input->unget();
+      return sed_yylex();
+    }
+    else {
+      g_registry.input->unget();
+      cc = '\\';
+    }
+ }
+
+  // Parse words
+  if (cc > 0 && cc < 256 && (isalpha(cc) || cc == '_')) {
+    string word;
+    while (cc > 0 && cc < 256 && (isalpha(cc) || isdigit(cc) || cc == '_') && !g_registry.input->eof()) {
+      word += cc;
+      g_registry.input->get(cc);
+    }
+    if (!g_registry.input->eof()) {
+      g_registry.input->unget();
+    }
+    sed_yylval.word = g_registry.addWord(word);
+    //cout << "\tRead word '" << word << "'." << endl;
+    if (word == "vs" && g_registry.input->peek() == '.') {
+      g_registry.input->get(cc);
+    }
+    return SEDWORD;
+  }
+
+  // Parse numbers
+  if (cc > 0 && cc < 256 && (isdigit(cc) || (cc=='.' && isdigit(g_registry.input->peek())))) {
+    if (cc=='.') {
+      //If the element *before* the '.' was a-z, we just return '.'.  This is for things like 'kisao.424':
+      streampos here = g_registry.input->tellg();
+      if (here>0) {
+        g_registry.input->unget();
+        g_registry.input->unget();
+        char prev;
+        g_registry.input->get(prev);
+        g_registry.input->get(cc);
+        if (('a' <= prev && prev <= 'z') || ('A' <= prev && prev <= 'Z')) {
+          return cc;
+        }
+      }
+    }
+    double number;
+    g_registry.input->unget();
+    streampos numbegin = g_registry.input->tellg();
+    *g_registry.input >> number;
+    streampos numend = g_registry.input->tellg();
+    if (g_registry.input->fail()) {
+      //The gcc 4.4.3 parser fails if there's an 'e' after a number with no exponent.
+      g_registry.input->clear();
+      g_registry.input->seekg(numbegin);
+      int numint;
+      *g_registry.input >> numint;
+      sed_yylval.number = numint;
+      if (g_registry.input->peek() == '.') {
+        g_registry.input->get();
+        *g_registry.input >> numint;
+        double fraction = numint;
+        while (fraction >= 1.0) {
+          fraction = fraction/10;
+        }
+        sed_yylval.number += fraction;
+      }
+      return NUM;
+    }
+    assert(g_registry.input->good());
+    sed_yylval.number = number;
+    //However, pre-4.4.3 parsers would read the 'e' anyway, and we don't want it to, so unget the 'e'.
+    g_registry.input->unget();
+    if (!g_registry.input->good()) {
+      //Sometimes you can't do this?  For some reason?  If this happens we'll assume there was no 'e'.
+      g_registry.input->clear();
+    }
+    else {
+      g_registry.input->get(cc);
+      if (cc == 'e' || cc == 'E') {
+        g_registry.input->unget();
+      }
+      if (cc == '.') {
+        //We might be in a 'kisao.43.c' situation.  Which is wrong, but at least clear what was meant.
+        char next = g_registry.input->peek();
+        if (('a' <= next && next <= 'z') || ('A' <= next && next <= 'Z')) {
+          g_registry.input->unget();
+        }
+      }
+    }
+    return NUM;
+  }
+
+  //Skip comments:
+  if (cc == '#') {
+      while (cc != '\n' && cc != '\r' && !g_registry.input->eof()) {
+        g_registry.input->get(cc);
+      }
+      if (!g_registry.input->eof()) {
+        g_registry.input->unget();
+      }
+      return sed_yylex();
+  }
+
+  //Check for '==' vs. '='
+  if (cc == '=') {
+    g_registry.input->get(cc);
+    if (cc == '=') {
+      return EQUALS;
+    }
+    g_registry.input->unget();
+    cc = '=';
+  }
+  //Parse text strings
+  if (cc == '"') {
+    string textstring;
+    long ccount = 0;
+    g_registry.input->get(cc);
+    while (cc != '"' && cc != '\r' && cc != '\n' && !g_registry.input->eof()) {
+      textstring += cc;
+      ccount++;
+      g_registry.input->get(cc);
+    }
+    if (cc == '\r' || cc == '\n' || g_registry.input->eof()) {
+      for (; ccount > 0; ccount--) {
+        g_registry.input->unget();
+      }
+      cc = '"';
+    }
+    else {
+      sed_yylval.word = g_registry.addWord(textstring);
+      return TEXTSTRING;
+    }
+  }
+
+  //This converts PC and Mac end-of-line characters to \n:
+  if (cc == '\r') {
+    g_registry.input->get(cc);
+    if (cc != '\n') {
+      g_registry.input->unget();
+    }
+    cc = '\n';
+  }
+  if (cc == '\n') {
+    ++sed_yylloc_last_line;
+    g_registry.midline = false;
+  }
+  return cc;
+}
