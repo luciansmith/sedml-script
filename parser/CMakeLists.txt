@@ -198,6 +198,7 @@ file(GLOB LIBSEDMLSCRIPT_SOURCES
           ${SEDMLSCRIPT_SRC_DIR}sedml-script.cpp
           ${SEDMLSCRIPT_SRC_DIR}sedml-script-api.cpp
           ${SEDMLSCRIPT_SRC_DIR}registry.cpp
+          ${SEDMLSCRIPT_SRC_DIR}statement.cpp
           ${SEDMLSCRIPT_SRC_DIR}stringx.cpp
           )
 
@@ -208,6 +209,7 @@ file(GLOB LIBSEDMLSCRIPT_HEADERS
           ${SEDMLSCRIPT_SRC_DIR}sedml-script-api.h
           ${SEDMLSCRIPT_SRC_DIR}sedml-script-namespace.h
           ${SEDMLSCRIPT_SRC_DIR}registry.h
+          ${SEDMLSCRIPT_SRC_DIR}statement.h
           ${SEDMLSCRIPT_SRC_DIR}stringx.h
           )
 

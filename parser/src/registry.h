@@ -7,9 +7,7 @@
 #include <set>
 #include <map>
 #include "sedml-script-namespace.h"
-//
-//#include "sedml/SedTypes.h"
-//#include "sbml/math/L3ParserSettings.h"
+#include "statement.h"
 
 SEDMLSCRIPT_CPP_NAMESPACE_BEGIN
 
@@ -20,20 +18,9 @@ private:
   std::string              m_error;
   int                      m_errorLine;
   std::vector<std::string> m_warnings;
-
   std::string              m_workingDirectory;
 
-  //The actual SEDML bits:
-  //std::vector<SedmlScriptModel>        m_models;
-  //std::vector<SedmlScriptSimulation*>  m_simulations;
-  //std::vector<SedmlScriptTask>         m_tasks;
-  //std::vector<SedmlScriptRepeatedTask> m_repeatedTasks;
-  //std::vector<SedmlScriptOutput>       m_outputs;
-
-  //Any saved SBML documents the user has set:
-  //std::map<std::string, SBMLDocument*> m_referencedSBML;
-
-  //L3ParserSettings         m_l3ps;
+  std::vector<Statement>   m_statements;
 
 public:
   Registry();
@@ -42,7 +29,7 @@ public:
   std::istream* input;
   std::vector<int> indents;
   bool midline;
-  int currIndent = 0;
+  int currIndent;
 
   char* convertFile(const std::string& filename);
   char* convertString(std::string model);
