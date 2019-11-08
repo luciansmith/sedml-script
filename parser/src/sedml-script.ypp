@@ -39,6 +39,7 @@
 //#include "module.h"
 //#include "unitdef.h"
 #include "stringx.h"
+#include <sbml/math/ASTNode.h>
 //#include "modelChange.h"
 
   using namespace std;
@@ -51,26 +52,24 @@
 
 /*Bison declarations */
 %union {
-  char character;
   const string* word;
   vector<const string*>* words;
-  vector<string>* wordstr;
-  vector<vector<string>*>* wordstrvec;
-  vector<vector<const string*>* >* nameslist;
+  ASTNode* astnode;
   double number;
-  vector<double>* nums;
+  map<const string*, ASTNode*>* dict;
 }
 
-%type   <character>     mathThing "mathematical symbol"
 %type   <words>         varOrKeyword 
-%type   <wordstr>       formula commaformula
-%type   <nums>          numlist
-%type   <number>        number
+%type   <astnode>       node nodelist vector
+%type   <dict>          dictionary nodecolonlist
 
-%left '&' '|' /* Boolean functions and, or */
+%left '&' '|'         /* Boolean functions and, or */
+%left '<' '>' '=' '!' /* Boolean comparison functions (gt, lt, eq, etc.) */
 %left '-' '+'
 %left '*' '/' '%'
-%right '^'    /* exponentiation        */
+%left NOT NEG UPLUS   /* Boolean negation (unary not), regular negation (unary minus), and unary plus (a no-op) */
+%right '^'            /* exponentiation        */
+%left '['
 
 %token YYEOF 0 "end of file"
 %token  <number> NUM "number"
@@ -80,6 +79,7 @@
 %token  <word> INDENT "an indentation increase"
 %token  <word> DEINDENT "an indentation decrease"
 %token  <word> EQUALS "=="
+
 
 %define api.prefix {sed_yy}
 %debug
@@ -95,76 +95,210 @@ input:          /* empty */
         |       input ERROR {YYABORT;}
         ;
 
+lineend:        '\n' {}
+        |       ';' {}
+        ;
+
 varOrKeyword:   SEDWORD {$$ = new vector<const string*>; $$->push_back($1);}
         |       varOrKeyword '.' SEDWORD {$$ = $1; $$->push_back($3);}
         ;
 
-equals:         varOrKeyword '=' formula  {if (g_registry.addEquals($1, $3)) YYABORT;}
+equals:         varOrKeyword '=' node  {if (g_registry.addEquals($1, $3)) YYABORT;}
+        |       varOrKeyword '=' vector  {if (g_registry.addEquals($1, $3)) YYABORT;}
+        |       varOrKeyword '=' dictionary  {if (g_registry.addEquals($1, $3)) YYABORT;}
         ;
 
-block:          varOrKeyword formula ':' lineend INDENT {if (g_registry.startBlock($1, $2)) YYABORT;} input DEINDENT {if (g_registry.endBlock()) YYABORT;}
-        ;
-
-numlist:        /* empty */ {$$ = new vector<double>;}
-        |       number {$$ = new vector<double>; $$->push_back($1);}
-        |       numlist ',' number {$$ = $1; $$->push_back($3);}
+block:          varOrKeyword node ':' lineend INDENT {if (g_registry.startBlock($1, $2)) YYABORT;} input DEINDENT {if (g_registry.endBlock()) YYABORT;}
         ;
 
 name:           varOrKeyword varOrKeyword TEXTSTRING {if (g_registry.setName($1, $2, $3)) YYABORT;}
         ;
 
-number:         NUM {$$ = $1;}
-        |       '-' NUM {$$ = -$2;}
-        ;
-
-formula:        varOrKeyword {$$ = new vector<string>(); $$->push_back(getStringFrom($1, ".")); }
-        |       NUM {$$ = new vector<string>(); $$->push_back(g_registry.ftoa($1)); }
-        |       '(' formula ')' {$$ = $2; $$->insert($$->begin(), "("); $$->push_back(")"); }
-        |       '-' {$$ = new vector<string>(); $$->push_back("-"); }
-        |       '!' {$$ = new vector<string>(); $$->push_back("!"); }
-        |       formula varOrKeyword {$$ = $1; $$->push_back(getStringFrom($2, ".")); }
-        |       formula NUM  {$$ = $1; $1->push_back(g_registry.ftoa($2)); }
-        |       formula '(' ')' {$$ = $1; $$->push_back("()");}
-        |       formula '(' commaformula ')'
-                {
-                  $$ = $1;
-                  $$->push_back("(");
-                  $$->insert($$->end(), $3->begin(), $3->end());
-                  $$->push_back(")");
-                  delete $3;
+node:           NUM {
+                  $$ = new ASTNode(); 
+                  $$->setValue($1); 
                 }
-        |       formula mathThing {$$ = $1; string mt; mt.push_back($2); $1->push_back(mt); }
-        |       formula '&' '&' {$$ = $1; $1->push_back("&&"); }
-        |       formula EQUALS  {$$ = $1; $1->push_back("=="); }
-        |       formula '|' '|' {$$ = $1; $1->push_back("||"); }
-        |       formula '[' numlist ']'
-                {
-                  $$ = $1;
-                  $$->push_back("[");
-                  for (size_t d=0; d<$3->size(); d++) {
-                    $$->push_back(g_registry.ftoa((*$3)[d]));
+        |       varOrKeyword {
+                   $$ = new ASTNode();
+                   string name = getStringFrom($1);
+                   $$->setName(name.c_str());
+                   //The symbol is not used in any other mathematical context in the SBML model, so we can see if it matches a list of pre-defined names
+                   ASTNodeType_t type = g_registry.getSymbolFor(name);
+                   if (type != AST_UNKNOWN) $$->setType(type);
+                   if (type==AST_REAL) {
+                     if (g_registry.l3StrCmp(name, "inf"))          $$->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(name, "infinity"))     $$->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(name, "nan"))          $$->setValue(numeric_limits<double>::quiet_NaN());
+                     if (g_registry.l3StrCmp(name, "notanumber"))   $$->setValue(numeric_limits<double>::quiet_NaN());
+                   }
+                }
+        |       '(' node ')'  {$$ = $2;}
+        |       node '^' node {$$ = new ASTNode(AST_LOGICAL_XOR); $$->addChild($1); $$->addChild($3);}
+        |       node '*' '*' node {$$ = new ASTNode(AST_POWER); $$->addChild($1); $$->addChild($4);}
+        |       node '*' node {
+                  if ($1->getType()==AST_TIMES) {
+                    $$ = $1;
+                    $$->addChild($3);
                   }
-                  $$->push_back("]");
-                  delete $3;
+                  else {
+                    $$ = new ASTNode(AST_TIMES);
+                    $$->addChild($1);
+                    $$->addChild($3);
+                  }
+                }
+        |       node '+' node {
+                  if ($1->getType()==AST_PLUS) {
+                    $$ = $1;
+                    $$->addChild($3);
+                  }
+                  else {
+                    $$ = new ASTNode(AST_PLUS);
+                    $$->addChild($1);
+                    $$->addChild($3);
+                  }
+                }
+        |       node '/' node {$$ = new ASTNode(AST_DIVIDE); $$->addChild($1); $$->addChild($3);}
+        |       node '/' '/' node {
+                  $$ = new ASTNode(AST_FUNCTION_FLOOR);
+                  ASTNode* astn = new ASTNode(AST_DIVIDE);
+                  astn->addChild($1);
+                  $$->addChild($4);
+                  $$->addChild(astn);
+                }
+        |       node '-' node {$$ = new ASTNode(AST_MINUS); $$->addChild($1); $$->addChild($3);}
+        |       node '%' node {
+                  $$ = new ASTNode(AST_FUNCTION_REM);
+                  $$->addChild($1);
+                  $$->addChild($3);
+                }
+        |       '+' node %prec UPLUS {$$ = $2;}
+        |       '-' node %prec NEG {
+                  $$ = new ASTNode(AST_MINUS);
+                  $$->addChild($2);
+                }
+        |       node '>' node {$$ = g_registry.combineRelationalElements($1, $3, AST_RELATIONAL_GT);}
+        |       node '<' node {$$ = g_registry.combineRelationalElements($1, $3, AST_RELATIONAL_LT);}
+        |       node '>' '=' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_GEQ);}
+        |       node '<' '=' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_LEQ);}
+        |       node '=' '=' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_EQ);}
+        |       node '!' '=' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_NEQ);}
+        |       node '<' '>' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_NEQ);}
+        |       node '>' '<' node {$$ = g_registry.combineRelationalElements($1, $4, AST_RELATIONAL_NEQ);}
+        |       node '&' '&' node {
+                  if ($1->getType()==AST_LOGICAL_AND) {
+                    $$ = $1;
+                    $$->addChild($4);
+                  }
+                  else {
+                    $$ = new ASTNode(AST_LOGICAL_AND);
+                    $$->addChild($1);
+                    $$->addChild($4);
+                  }
+                }
+        |       node '|' '|' node {
+                  if ($1->getType()==AST_LOGICAL_OR) {
+                    $$ = $1;
+                    $$->addChild($4);
+                  }
+                  else {
+                    $$ = new ASTNode(AST_LOGICAL_OR);
+                    $$->addChild($1);
+                    $$->addChild($4);
+                  }
+                }
+        |       '!' node %prec NOT {$$ = new ASTNode(AST_LOGICAL_NOT); $$->addChild($2);}
+        |       varOrKeyword '(' nodelist ')' {
+                   $$ = $3;
+                   string name = getStringFrom($1);
+                   $$->setName(name.c_str());
+                   $$->setType(AST_FUNCTION);
+                   if (g_registry.isDef($1) == false) {
+                     //The symbol is not a function definition, so we can see if it matches a list of pre-defined names
+                     ASTNodeType_t type = g_registry.getFunctionFor(name);
+                     if (type != AST_UNKNOWN) $$->setType(type);
+                     if (type==AST_FUNCTION_ROOT && g_registry.l3StrCmp(name, "sqrt")) {
+                       //If the number of arguments is wrong, set an error now instead of waiting for later.
+                       if ($$->getNumChildren() != 1) {
+                         sed_yyerror("The function 'sqrt' takes exactly one argument.");
+                         delete $$;
+                         YYABORT;
+                       }
+                       //Add a '2' node before the existing child.
+                       ASTNode* int2 = new ASTNode(AST_INTEGER);
+                       int2->setValue(2);
+                       $$->prependChild(int2);
+                     }
+                     if (type==AST_FUNCTION_POWER && g_registry.l3StrCmp(name, "sqr")) {
+                       //Add a '2' node after the existing child.
+                       ASTNode* int2 = new ASTNode(AST_INTEGER);
+                       int2->setValue(2);
+                       $$->addChild(int2);
+                     }
+                     if (type==AST_FUNCTION_LOG && g_registry.l3StrCmp(name, "log10")) {
+                       //Add a '10' node before the existing child.
+                       ASTNode* int10 = new ASTNode(AST_INTEGER);
+                       int10->setValue(10);
+                       $$->prependChild(int10);
+                     }
+                     if (type==AST_FUNCTION_LOG && g_registry.l3StrCmp(name, "log")) {
+                       //If there is exactly one argument, change it to ln (since math.log(x) is ln in python).
+                       if ($$->getNumChildren() == 1) {
+                         $$->setType(AST_FUNCTION_LN);
+                       }
+                     }
+                   }
+                   if (g_registry.checkNumArguments($$)) YYABORT;
+        }
+        |       varOrKeyword '(' ')' {
+                   $$ = new ASTNode(AST_FUNCTION);
+                   string name = getStringFrom($1);
+                   $$->setName(name.c_str());
+                   ASTNodeType_t type = g_registry.getFunctionFor(name);
+                   if (type != AST_UNKNOWN) $$->setType(type);
+                   if (g_registry.checkNumArguments($$)) YYABORT;
+        }
+        |       node '[' node ']' {
+                  $$ = new ASTNode();
+                  $$->setType(AST_LINEAR_ALGEBRA_SELECTOR);
+                  $$->addChild($1);
+                  $$->addChild($3);
+                }
+        |       node '[' ']' {
+                  sed_yyerror("Illegal to define empty square brackets as a selector.");
+                  YYABORT;
+                }
+//        |       '{' '}'  {
+//                  $$ = g_registry.parsePackageInfix(INFIX_SYNTAX_CURLY_BRACES);
+//                  if ($$ == NULL) {
+//                    sed_yyerror("No package is enabled that can interpret empty curly braces, so formulas of the form '{}' are disallowed.");
+//                    YYERROR;
+//                  }
+//                  if (g_registry.checkNumArgumentsForPackage($$)) YYABORT;
+//                }
+        ;
+
+vector:         '[' ']' {$$ = new ASTNode(AST_LINEAR_ALGEBRA_VECTOR);}
+        |       '[' nodelist ']' {$$ = $2; $$->setType(AST_LINEAR_ALGEBRA_VECTOR);}
+        ;
+
+nodelist:       node {$$ = new ASTNode(AST_FUNCTION); $$->addChild($1); }
+        |       nodelist ',' node {$$ = $1;  $$->addChild($3);}
+        |       nodelist ',' node '=' node {
+                  $$ = $1;
+                  ASTNode* astn = new ASTNode(AST_RELATIONAL_EQ);
+                  astn->setClass("assignment"); //To distinguish it from '=='
+                  astn->addChild($3);
+                  astn->addChild($5);
+                  $$->addChild(astn);
                 }
         ;
 
-commaformula:   formula {$$ = $1;}
-        |       commaformula ',' formula {$$ = $1; $$->push_back(","); $$->insert($$->end(), $3->begin(), $3->end()); }
+dictionary:     '{' '}' {$$ = new map<const string*, ASTNode*>();}
+        |       '{' nodecolonlist '}' {$$ = $2; }
         ;
 
-mathThing:      '+' {$$ = '+';}
-        |       '-' {$$ = '-';}
-        |       '*' {$$ = '*';}
-        |       '/' {$$ = '/';}
-        |       '^' {$$ = '^';}
-        |       '>' {$$ = '>';}
-        |       '<' {$$ = '<';}
-        |       '!' {$$ = '!';}
-        |       '%' {$$ = '%';}
-        ;
-
-lineend:        '\n' {}
+nodecolonlist:  SEDWORD ':' node {$$ = new map<const string*, ASTNode*>; (*$$)[$1] = $3;}
+        |       nodecolonlist ',' SEDWORD ':' node {$$ = $1;  (*$$)[$3] = $5;;}
         ;
 
 %%

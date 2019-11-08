@@ -5,18 +5,18 @@
 #include <cmath>
 #include <math.h>
 
+#include "stringx.h"
 #include "statement.h"
 #include "registry.h"
-#include "stringx.h"
-
 
 using namespace std;
+using namespace sedmlscript;
 extern bool CaselessStrCmp(const string& lhs, const string& rhs);
 
 Statement::Statement()
   : m_type(stUnknown)
-  , m_target("")
-  , m_formula("")
+  , m_target()
+  , m_formula()
   , m_statements()
 {
 }
@@ -32,14 +32,25 @@ bool Statement::setType(statement_type type)
   return false;
 }
 
-bool Statement::setTarget(std::string target)
+bool Statement::setTarget(vector<string> target)
 {
   m_target = target;
   //Check stuff
   return false;
 }
 
-bool Statement::setFormula(std::string formula)
+bool Statement::setTarget(vector<const string*>* target)
+{
+  if (target == NULL) {
+    return false;
+  }
+  for (size_t tnum = 0; tnum < (*target).size(); tnum++) {
+    m_target.push_back(*(*target)[tnum]);
+  }
+  return false;
+}
+
+bool Statement::setFormula(ASTNode* formula)
 {
   m_formula = formula;
   //Check stuff.
@@ -63,17 +74,53 @@ bool Statement::removeStatement(size_t n)
   return false;
 }
 
+string Statement::getPython(string indent)
+{
+  string ret = "";
+  if (m_type == stUnknown) {
+    return ret;
+  }
+  if (m_type == stEquals) {
+    ret += indent;
+    ret += getStringFrom(&m_target);
+    ret += " = ";
+    ret += SBML_formulaToL3String(m_formula);
+    ret += "\n";
+    return ret;
+  }
+  //Otherwise it's a block:
+  ret += indent;
+  switch (m_type) {
+  case stBlockDef:
+    ret += "def ";
+    break;
+  case stBlockIf:
+    ret += "if ";
+    break;
+  case stBlockFor:
+    ret += "for ";
+    break;
+  }
+  ret += SBML_formulaToL3String(m_formula);
+  ret += ":\n";
+  indent += g_registry.getIndent();
+  for (size_t snum = 0; snum < m_statements.size(); snum++) {
+    ret += m_statements[snum].getPython(indent);
+  }
+  return ret;
+}
+
 statement_type Statement::getType() const
 {
   return m_type;
 }
 
-std::string Statement::getTarget() const
+vector<string> Statement::getTarget() const
 {
   return m_target;
 }
 
-std::string Statement::getFormula() const
+ASTNode* Statement::getFormula() const
 {
   return m_formula;
 }

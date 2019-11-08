@@ -88,6 +88,7 @@
 //#include "module.h"
 //#include "unitdef.h"
 #include "stringx.h"
+#include <sbml/math/ASTNode.h>
 //#include "modelChange.h"
 
   using namespace std;
@@ -97,7 +98,7 @@
   Registry g_registry;
   int sed_yylloc_last_line = 1;
 
-#line 101 "sedml-script.cpp" /* yacc.c:339  */
+#line 102 "sedml-script.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -138,13 +139,16 @@ extern int sed_yydebug;
   enum sed_yytokentype
   {
     YYEOF = 0,
-    NUM = 259,
-    SEDWORD = 260,
-    TEXTSTRING = 261,
-    ERROR = 262,
-    INDENT = 263,
-    DEINDENT = 264,
-    EQUALS = 265
+    NOT = 258,
+    NEG = 259,
+    UPLUS = 260,
+    NUM = 261,
+    SEDWORD = 262,
+    TEXTSTRING = 263,
+    ERROR = 264,
+    INDENT = 265,
+    DEINDENT = 266,
+    EQUALS = 267
   };
 #endif
 
@@ -153,18 +157,15 @@ extern int sed_yydebug;
 
 union SED_YYSTYPE
 {
-#line 53 "sedml-script.ypp" /* yacc.c:355  */
+#line 54 "sedml-script.ypp" /* yacc.c:355  */
 
-  char character;
   const string* word;
   vector<const string*>* words;
-  vector<string>* wordstr;
-  vector<vector<string>*>* wordstrvec;
-  vector<vector<const string*>* >* nameslist;
+  ASTNode* astnode;
   double number;
-  vector<double>* nums;
+  map<const string*, ASTNode*>* dict;
 
-#line 168 "sedml-script.cpp" /* yacc.c:355  */
+#line 169 "sedml-script.cpp" /* yacc.c:355  */
 };
 
 typedef union SED_YYSTYPE SED_YYSTYPE;
@@ -181,7 +182,7 @@ int sed_yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 185 "sedml-script.cpp" /* yacc.c:358  */
+#line 186 "sedml-script.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -423,21 +424,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   141
+#define YYLAST   320
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  31
+#define YYNTOKENS  36
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  13
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  45
+#define YYNRULES  55
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  67
+#define YYNSTATES  109
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   265
+#define YYMAXUTOK   267
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -447,20 +448,18 @@ union yyalloc
 static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      30,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      26,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    25,     2,     2,     2,    10,     4,     2,
-      23,    24,     8,     7,    22,     6,    19,     9,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    21,     2,
-      29,    20,    28,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,    26,     2,    27,    11,     2,     2,     2,     2,     2,
+       2,     2,     2,     8,     2,     2,     2,    13,     3,     2,
+      30,    31,    11,    10,    33,     9,    28,    12,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    29,    27,
+       5,     7,     6,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     5,     2,     2,     2,     2,     2,
+       2,    18,     2,    32,    17,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    34,     4,    35,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -471,19 +470,22 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,    12,
-      13,    14,    15,    16,    17,    18
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     1,     2,    14,    15,
+      16,    19,    20,    21,    22,    23,    24,    25
 };
 
 #if SED_YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
        0,    89,    89,    90,    91,    92,    93,    94,    95,    98,
-      99,   102,   105,   105,   108,   109,   110,   113,   116,   117,
-     120,   121,   122,   123,   124,   125,   126,   127,   128,   136,
-     137,   138,   139,   140,   152,   153,   156,   157,   158,   159,
-     160,   161,   162,   163,   164,   167
+      99,   102,   103,   106,   107,   108,   111,   111,   114,   117,
+     121,   135,   136,   137,   138,   149,   160,   161,   168,   169,
+     174,   175,   179,   180,   181,   182,   183,   184,   185,   186,
+     187,   198,   209,   210,   252,   260,   266,   280,   281,   284,
+     285,   286,   296,   297,   300,   301
 };
 #endif
 
@@ -492,14 +494,14 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "$undefined", "\"mathematical symbol\"",
-  "'&'", "'|'", "'-'", "'+'", "'*'", "'/'", "'%'", "'^'", "\"number\"",
-  "\"element name\"", "\"text string in quotes\"", "\"an error\"",
+  "\"end of file\"", "error", "$undefined", "'&'", "'|'", "'<'", "'>'",
+  "'='", "'!'", "'-'", "'+'", "'*'", "'/'", "'%'", "NOT", "NEG", "UPLUS",
+  "'^'", "'['", "\"number\"", "\"element name\"",
+  "\"text string in quotes\"", "\"an error\"",
   "\"an indentation increase\"", "\"an indentation decrease\"", "\"==\"",
-  "'.'", "'='", "':'", "','", "'('", "')'", "'!'", "'['", "']'", "'>'",
-  "'<'", "'\\n'", "$accept", "input", "varOrKeyword", "equals", "block",
-  "$@1", "numlist", "name", "number", "formula", "commaformula",
-  "mathThing", "lineend", YY_NULLPTR
+  "'\\n'", "';'", "'.'", "':'", "'('", "')'", "']'", "','", "'{'", "'}'",
+  "$accept", "input", "lineend", "varOrKeyword", "equals", "block", "$@1",
+  "name", "node", "vector", "nodelist", "dictionary", "nodecolonlist", YY_NULLPTR
 };
 #endif
 
@@ -508,17 +510,17 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,    38,   124,    45,    43,    42,    47,
-      37,    94,   259,   260,   261,   262,   263,   264,   265,    46,
-      61,    58,    44,    40,    41,    33,    91,    93,    62,    60,
-      10
+       0,   256,   257,    38,   124,    60,    62,    61,    33,    45,
+      43,    42,    47,    37,   258,   259,   260,    94,    91,   261,
+     262,   263,   264,   265,   266,   267,    10,    59,    46,    58,
+      40,    41,    93,    44,   123,   125
 };
 # endif
 
-#define YYPACT_NINF -33
+#define YYPACT_NINF -37
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-33)))
+  (!!((Yystate) == (-37)))
 
 #define YYTABLE_NINF -1
 
@@ -527,15 +529,19 @@ static const yytype_uint16 yytoknum[] =
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
-static const yytype_int8 yypact[] =
+static const yytype_int16 yypact[] =
 {
-     -33,     3,   -33,   -33,   -33,   -33,   -33,    16,   -22,   -33,
-     -22,   -33,   -33,   -33,    -3,   116,   116,   -33,    -7,    40,
-     -33,   -33,   -33,    -6,    92,    66,   -33,    19,    20,   -33,
-     -33,   -33,   -33,   -33,   -33,   -33,   -33,   -22,   100,   -33,
-      14,   -33,   -33,    -6,   -33,   -33,   -33,   -33,    15,   -33,
-      92,    18,    42,   -33,     5,   -33,   -33,   116,   -33,   -33,
-      14,   -33,   -33,    92,   -33,     4,   -33
+     -37,    47,   -37,   -37,   -37,   -37,   -37,   -37,   -37,   187,
+     -20,   -37,   -20,   112,   234,   234,   234,   -37,    17,   234,
+      75,   106,   -37,   -37,   156,    -7,   -27,   262,   -37,   -37,
+      12,    12,    12,   -37,    77,   -37,   190,    35,    46,   153,
+     148,    45,    48,   234,   234,   217,   221,   234,   234,   161,
+     -20,   -37,   262,     1,    24,   -37,   -31,   -37,   -37,    18,
+     234,   234,   234,   234,   302,   234,   234,   302,   234,   234,
+      80,    80,   234,    12,   234,    12,    12,    12,   -37,    14,
+      37,   -37,   234,   234,    43,   -37,   -37,   292,   292,   302,
+     302,   302,   302,   302,   302,    12,    12,   -37,   -37,   278,
+     262,    42,   -37,   194,   234,   125,   262,   262,   -37
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -543,27 +549,31 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1,     7,     9,     8,    45,     0,     0,     4,
-       0,     6,    23,    21,     0,     0,     0,    24,    20,     0,
-       3,     5,    10,    20,    11,     0,    17,     0,     0,    37,
-      36,    38,    39,    44,    40,    26,    31,     0,     0,    43,
-      14,    41,    42,    25,    29,    22,    30,    32,     0,    27,
-      34,     0,     0,    18,     0,    15,    12,     0,    28,    19,
-       0,    33,     2,    35,    16,     0,    13
+       2,     0,     1,     7,    11,     8,     9,    10,     6,     0,
+       0,     4,     0,     0,     0,     0,     0,    19,     0,     0,
+      20,     0,     3,     5,     0,     0,    20,    13,    14,    15,
+      42,    31,    30,    12,     0,    18,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    47,    49,     0,     0,    52,     0,    21,    44,     0,
+       0,     0,     0,     0,    33,     0,     0,    32,     0,     0,
+      28,    25,     0,    24,     0,    26,    29,    22,    46,     0,
+       0,    48,     0,     0,     0,    53,    43,    40,    41,    38,
+      35,    39,    34,    36,    37,    23,    27,    45,    16,    50,
+      54,     0,     2,     0,     0,     0,    51,    55,    17
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -33,   -32,    -1,   -33,   -33,   -33,   -33,   -33,    -5,   -14,
-     -33,   -33,     1
+     -37,   -36,     4,    -1,   -37,   -37,   -37,   -37,    -4,   -37,
+      36,   -37,   -37
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,    43,     8,     9,    62,    54,    10,    55,    19,
-      51,    44,    11
+      -1,     1,     8,    26,    10,    11,   102,    12,    52,    28,
+      53,    29,    56
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -571,73 +581,115 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       7,    24,    25,     2,     3,     3,    18,    26,     6,    20,
-      22,    21,    14,    14,    23,    23,     4,     4,     5,     5,
-      52,    66,    12,    46,    50,    47,    53,    60,    13,     4,
-      65,    56,    61,     6,     6,    14,    15,    23,    48,    16,
-      57,    17,    58,    63,    27,    28,    29,    30,    31,    32,
-      33,    34,    35,     4,    59,    64,    23,     0,    36,     0,
-       0,    37,     0,    38,     7,    39,    40,     0,    41,    42,
-      27,    28,    29,    30,    31,    32,    33,    34,    35,     4,
-       0,     0,     0,     0,    36,     0,     0,     0,     0,    38,
-      45,    39,    40,     0,    41,    42,    27,    28,    29,    30,
-      31,    32,    33,    34,    35,     4,    12,     0,     0,     0,
-      36,     0,    13,     4,     0,    38,     0,    39,    40,     0,
-      41,    42,    12,    16,    49,    17,     0,     0,    13,     4,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    16,
-       0,    17
+       9,    18,    84,    36,    85,    21,     6,     7,    20,    27,
+      30,    31,    32,    54,    22,    34,    23,    37,    38,    39,
+      40,    41,    42,    43,    44,    45,    46,    47,    55,    48,
+      49,    48,    49,    81,    82,    64,    67,    33,    60,    70,
+      71,    73,    75,    76,    77,    79,    97,     2,     3,    86,
+      61,    82,    68,    83,    80,    69,    87,    88,    89,    90,
+      98,    91,    92,   101,    93,    94,   105,     4,    95,     5,
+      96,   104,    59,     6,     7,     0,     0,     0,    99,   100,
+      37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+      47,    45,    46,    47,    48,    49,    35,    48,    49,   106,
+     107,     0,     0,    18,     9,    36,     0,     0,    57,    37,
+      38,    39,    40,    41,    42,    43,    44,    45,    46,    47,
+      14,    15,    16,    48,    49,     0,     3,     0,     0,     0,
+      24,    17,     4,     0,     0,    50,     0,     0,     0,     0,
+       0,     0,    19,     0,     0,     4,    25,     5,     0,   108,
+       0,     6,     7,    65,     0,    66,    14,    15,    16,    62,
+      63,    14,    15,    16,    14,    15,    16,    17,     4,    14,
+      15,    16,    17,     4,     0,    17,     4,     0,    19,     0,
+      17,     4,     0,    19,     0,     0,    19,     0,    51,     0,
+       0,    19,     0,    78,    13,    14,    15,    16,    14,    15,
+      16,    68,    14,    15,    16,     0,    17,     4,     0,    17,
+       4,     0,     0,    17,     4,    18,     0,    19,     0,     0,
+      19,    58,     0,     0,    19,    14,    15,    16,    72,    14,
+      15,    16,     0,    74,     0,     0,    17,     4,     0,     0,
+      17,     4,    14,    15,    16,     0,     0,    19,     0,     0,
+       0,    19,     0,    17,     4,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,    19,    37,    38,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,     0,     0,     0,    48,
+      49,    37,    38,    39,    40,   103,    42,    43,    44,    45,
+      46,    47,     0,     0,     0,    48,    49,    39,    40,    41,
+      42,    43,    44,    45,    46,    47,     0,     0,     0,    48,
+      49,    43,    44,    45,    46,    47,     0,     0,     0,    48,
+      49
 };
 
 static const yytype_int8 yycheck[] =
 {
-       1,    15,    16,     0,     1,     1,     7,    14,    30,     8,
-      13,    10,    19,    19,    15,    16,    13,    13,    15,    15,
-       6,    17,     6,     4,    38,     5,    12,    22,    12,    13,
-      62,    16,    27,    30,    30,    19,    20,    38,    37,    23,
-      22,    25,    24,    57,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    12,    60,    57,    -1,    18,    -1,
-      -1,    21,    -1,    23,    65,    25,    26,    -1,    28,    29,
+       1,    28,    33,    30,    35,     9,    26,    27,     9,    13,
+      14,    15,    16,    20,    10,    19,    12,     3,     4,     5,
+       6,     7,     8,     9,    10,    11,    12,    13,    35,    17,
+      18,    17,    18,    32,    33,    39,    40,    20,     3,    43,
+      44,    45,    46,    47,    48,    49,    32,     0,     1,    31,
+       4,    33,     7,    29,    50,     7,    60,    61,    62,    63,
+      23,    65,    66,    20,    68,    69,   102,    20,    72,    22,
+      74,    29,    36,    26,    27,    -1,    -1,    -1,    82,    83,
+       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
+      13,    11,    12,    13,    17,    18,    21,    17,    18,   103,
+     104,    -1,    -1,    28,   105,    30,    -1,    -1,    31,     3,
        4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      -1,    -1,    -1,    -1,    18,    -1,    -1,    -1,    -1,    23,
-      24,    25,    26,    -1,    28,    29,     4,     5,     6,     7,
-       8,     9,    10,    11,    12,    13,     6,    -1,    -1,    -1,
-      18,    -1,    12,    13,    -1,    23,    -1,    25,    26,    -1,
-      28,    29,     6,    23,    24,    25,    -1,    -1,    12,    13,
-      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    23,
-      -1,    25
+       8,     9,    10,    17,    18,    -1,     1,    -1,    -1,    -1,
+      18,    19,    20,    -1,    -1,    29,    -1,    -1,    -1,    -1,
+      -1,    -1,    30,    -1,    -1,    20,    34,    22,    -1,    24,
+      -1,    26,    27,     5,    -1,     7,     8,     9,    10,     6,
+       7,     8,     9,    10,     8,     9,    10,    19,    20,     8,
+       9,    10,    19,    20,    -1,    19,    20,    -1,    30,    -1,
+      19,    20,    -1,    30,    -1,    -1,    30,    -1,    32,    -1,
+      -1,    30,    -1,    32,     7,     8,     9,    10,     8,     9,
+      10,     7,     8,     9,    10,    -1,    19,    20,    -1,    19,
+      20,    -1,    -1,    19,    20,    28,    -1,    30,    -1,    -1,
+      30,    31,    -1,    -1,    30,     8,     9,    10,    11,     8,
+       9,    10,    -1,    12,    -1,    -1,    19,    20,    -1,    -1,
+      19,    20,     8,     9,    10,    -1,    -1,    30,    -1,    -1,
+      -1,    30,    -1,    19,    20,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    30,     3,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    -1,    -1,    -1,    17,
+      18,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    -1,    -1,    -1,    17,    18,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    -1,    -1,    -1,    17,
+      18,     9,    10,    11,    12,    13,    -1,    -1,    -1,    17,
+      18
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    32,     0,     1,    13,    15,    30,    33,    34,    35,
-      38,    43,     6,    12,    19,    20,    23,    25,    33,    40,
-      43,    43,    13,    33,    40,    40,    14,     4,     5,     6,
-       7,     8,     9,    10,    11,    12,    18,    21,    23,    25,
-      26,    28,    29,    33,    42,    24,     4,     5,    43,    24,
-      40,    41,     6,    12,    37,    39,    16,    22,    24,    12,
-      22,    27,    36,    40,    39,    32,    17
+       0,    37,     0,     1,    20,    22,    26,    27,    38,    39,
+      40,    41,    43,     7,     8,     9,    10,    19,    28,    30,
+      39,    44,    38,    38,    18,    34,    39,    44,    45,    47,
+      44,    44,    44,    20,    44,    21,    30,     3,     4,     5,
+       6,     7,     8,     9,    10,    11,    12,    13,    17,    18,
+      29,    32,    44,    46,    20,    35,    48,    31,    31,    46,
+       3,     4,     6,     7,    44,     5,     7,    44,     7,     7,
+      44,    44,    11,    44,    12,    44,    44,    44,    32,    44,
+      38,    32,    33,    29,    33,    35,    31,    44,    44,    44,
+      44,    44,    44,    44,    44,    44,    44,    32,    23,    44,
+      44,    20,    42,     7,    29,    37,    44,    44,    24
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    31,    32,    32,    32,    32,    32,    32,    32,    33,
-      33,    34,    36,    35,    37,    37,    37,    38,    39,    39,
-      40,    40,    40,    40,    40,    40,    40,    40,    40,    40,
-      40,    40,    40,    40,    41,    41,    42,    42,    42,    42,
-      42,    42,    42,    42,    42,    43
+       0,    36,    37,    37,    37,    37,    37,    37,    37,    38,
+      38,    39,    39,    40,    40,    40,    42,    41,    43,    44,
+      44,    44,    44,    44,    44,    44,    44,    44,    44,    44,
+      44,    44,    44,    44,    44,    44,    44,    44,    44,    44,
+      44,    44,    44,    44,    44,    44,    44,    45,    45,    46,
+      46,    46,    47,    47,    48,    48
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     3,     2,     3,     2,     2,     2,     1,
-       3,     3,     0,     8,     0,     1,     3,     3,     1,     2,
-       1,     1,     3,     1,     1,     2,     2,     3,     4,     2,
-       3,     2,     3,     4,     1,     3,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1
+       1,     1,     3,     3,     3,     3,     0,     8,     3,     1,
+       1,     3,     3,     4,     3,     3,     3,     4,     3,     3,
+       2,     2,     3,     3,     4,     4,     4,     4,     4,     4,
+       4,     4,     2,     4,     3,     4,     3,     2,     3,     1,
+       3,     5,     2,     3,     3,     5
 };
 
 
@@ -1316,277 +1368,455 @@ yyreduce:
         case 3:
 #line 90 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1320 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1372 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 91 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1326 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1378 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
 #line 92 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1332 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1384 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
 #line 93 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1338 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1390 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 94 "sedml-script.ypp" /* yacc.c:1646  */
     {YYABORT;}
-#line 1344 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1396 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
 #line 95 "sedml-script.ypp" /* yacc.c:1646  */
     {YYABORT;}
-#line 1350 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1402 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
 #line 98 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.words) = new vector<const string*>; (yyval.words)->push_back((yyvsp[0].word));}
-#line 1356 "sedml-script.cpp" /* yacc.c:1646  */
+    {}
+#line 1408 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
 #line 99 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.words) = (yyvsp[-2].words); (yyval.words)->push_back((yyvsp[0].word));}
-#line 1362 "sedml-script.cpp" /* yacc.c:1646  */
+    {}
+#line 1414 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
 #line 102 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].wordstr))) YYABORT;}
-#line 1368 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.words) = new vector<const string*>; (yyval.words)->push_back((yyvsp[0].word));}
+#line 1420 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 105 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.startBlock((yyvsp[-4].words), (yyvsp[-3].wordstr))) YYABORT;}
-#line 1374 "sedml-script.cpp" /* yacc.c:1646  */
+#line 103 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.words) = (yyvsp[-2].words); (yyval.words)->push_back((yyvsp[0].word));}
+#line 1426 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 105 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.endBlock()) YYABORT;}
-#line 1380 "sedml-script.cpp" /* yacc.c:1646  */
+#line 106 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].astnode))) YYABORT;}
+#line 1432 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 108 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.nums) = new vector<double>;}
-#line 1386 "sedml-script.cpp" /* yacc.c:1646  */
+#line 107 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].astnode))) YYABORT;}
+#line 1438 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 109 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.nums) = new vector<double>; (yyval.nums)->push_back((yyvsp[0].number));}
-#line 1392 "sedml-script.cpp" /* yacc.c:1646  */
+#line 108 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].dict))) YYABORT;}
+#line 1444 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 110 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.nums) = (yyvsp[-2].nums); (yyval.nums)->push_back((yyvsp[0].number));}
-#line 1398 "sedml-script.cpp" /* yacc.c:1646  */
+#line 111 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.startBlock((yyvsp[-4].words), (yyvsp[-3].astnode))) YYABORT;}
+#line 1450 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 113 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.setName((yyvsp[-2].words), (yyvsp[-1].words), (yyvsp[0].word))) YYABORT;}
-#line 1404 "sedml-script.cpp" /* yacc.c:1646  */
+#line 111 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.endBlock()) YYABORT;}
+#line 1456 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 116 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.number) = (yyvsp[0].number);}
-#line 1410 "sedml-script.cpp" /* yacc.c:1646  */
+#line 114 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.setName((yyvsp[-2].words), (yyvsp[-1].words), (yyvsp[0].word))) YYABORT;}
+#line 1462 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
 #line 117 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.number) = -(yyvsp[0].number);}
-#line 1416 "sedml-script.cpp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = new ASTNode(); 
+                  (yyval.astnode)->setValue((yyvsp[0].number)); 
+                }
+#line 1471 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 120 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = new vector<string>(); (yyval.wordstr)->push_back(getStringFrom((yyvsp[0].words), ".")); }
-#line 1422 "sedml-script.cpp" /* yacc.c:1646  */
+#line 121 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                   (yyval.astnode) = new ASTNode();
+                   string name = getStringFrom((yyvsp[0].words));
+                   (yyval.astnode)->setName(name.c_str());
+                   //The symbol is not used in any other mathematical context in the SBML model, so we can see if it matches a list of pre-defined names
+                   ASTNodeType_t type = g_registry.getSymbolFor(name);
+                   if (type != AST_UNKNOWN) (yyval.astnode)->setType(type);
+                   if (type==AST_REAL) {
+                     if (g_registry.l3StrCmp(name, "inf"))          (yyval.astnode)->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(name, "infinity"))     (yyval.astnode)->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(name, "nan"))          (yyval.astnode)->setValue(numeric_limits<double>::quiet_NaN());
+                     if (g_registry.l3StrCmp(name, "notanumber"))   (yyval.astnode)->setValue(numeric_limits<double>::quiet_NaN());
+                   }
+                }
+#line 1490 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 121 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = new vector<string>(); (yyval.wordstr)->push_back(g_registry.ftoa((yyvsp[0].number))); }
-#line 1428 "sedml-script.cpp" /* yacc.c:1646  */
+#line 135 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-1].astnode);}
+#line 1496 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 122 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-1].wordstr); (yyval.wordstr)->insert((yyval.wordstr)->begin(), "("); (yyval.wordstr)->push_back(")"); }
-#line 1434 "sedml-script.cpp" /* yacc.c:1646  */
+#line 136 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_LOGICAL_XOR); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1502 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 123 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = new vector<string>(); (yyval.wordstr)->push_back("-"); }
-#line 1440 "sedml-script.cpp" /* yacc.c:1646  */
+#line 137 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_POWER); (yyval.astnode)->addChild((yyvsp[-3].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1508 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 124 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = new vector<string>(); (yyval.wordstr)->push_back("!"); }
-#line 1446 "sedml-script.cpp" /* yacc.c:1646  */
+#line 138 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  if ((yyvsp[-2].astnode)->getType()==AST_TIMES) {
+                    (yyval.astnode) = (yyvsp[-2].astnode);
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                  else {
+                    (yyval.astnode) = new ASTNode(AST_TIMES);
+                    (yyval.astnode)->addChild((yyvsp[-2].astnode));
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                }
+#line 1524 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 125 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-1].wordstr); (yyval.wordstr)->push_back(getStringFrom((yyvsp[0].words), ".")); }
-#line 1452 "sedml-script.cpp" /* yacc.c:1646  */
+#line 149 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  if ((yyvsp[-2].astnode)->getType()==AST_PLUS) {
+                    (yyval.astnode) = (yyvsp[-2].astnode);
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                  else {
+                    (yyval.astnode) = new ASTNode(AST_PLUS);
+                    (yyval.astnode)->addChild((yyvsp[-2].astnode));
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                }
+#line 1540 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 126 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-1].wordstr); (yyvsp[-1].wordstr)->push_back(g_registry.ftoa((yyvsp[0].number))); }
-#line 1458 "sedml-script.cpp" /* yacc.c:1646  */
+#line 160 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_DIVIDE); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1546 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 127 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-2].wordstr); (yyval.wordstr)->push_back("()");}
-#line 1464 "sedml-script.cpp" /* yacc.c:1646  */
+#line 161 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = new ASTNode(AST_FUNCTION_FLOOR);
+                  ASTNode* astn = new ASTNode(AST_DIVIDE);
+                  astn->addChild((yyvsp[-3].astnode));
+                  (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  (yyval.astnode)->addChild(astn);
+                }
+#line 1558 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 129 "sedml-script.ypp" /* yacc.c:1646  */
-    {
-                  (yyval.wordstr) = (yyvsp[-3].wordstr);
-                  (yyval.wordstr)->push_back("(");
-                  (yyval.wordstr)->insert((yyval.wordstr)->end(), (yyvsp[-1].wordstr)->begin(), (yyvsp[-1].wordstr)->end());
-                  (yyval.wordstr)->push_back(")");
-                  delete (yyvsp[-1].wordstr);
-                }
-#line 1476 "sedml-script.cpp" /* yacc.c:1646  */
+#line 168 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_MINUS); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1564 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 136 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-1].wordstr); string mt; mt.push_back((yyvsp[0].character)); (yyvsp[-1].wordstr)->push_back(mt); }
-#line 1482 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 30:
-#line 137 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-2].wordstr); (yyvsp[-2].wordstr)->push_back("&&"); }
-#line 1488 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 31:
-#line 138 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-1].wordstr); (yyvsp[-1].wordstr)->push_back("=="); }
-#line 1494 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 32:
-#line 139 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-2].wordstr); (yyvsp[-2].wordstr)->push_back("||"); }
-#line 1500 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 33:
-#line 141 "sedml-script.ypp" /* yacc.c:1646  */
+#line 169 "sedml-script.ypp" /* yacc.c:1646  */
     {
-                  (yyval.wordstr) = (yyvsp[-3].wordstr);
-                  (yyval.wordstr)->push_back("[");
-                  for (size_t d=0; d<(yyvsp[-1].nums)->size(); d++) {
-                    (yyval.wordstr)->push_back(g_registry.ftoa((*(yyvsp[-1].nums))[d]));
-                  }
-                  (yyval.wordstr)->push_back("]");
-                  delete (yyvsp[-1].nums);
+                  (yyval.astnode) = new ASTNode(AST_FUNCTION_REM);
+                  (yyval.astnode)->addChild((yyvsp[-2].astnode));
+                  (yyval.astnode)->addChild((yyvsp[0].astnode));
                 }
-#line 1514 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 34:
-#line 152 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[0].wordstr);}
-#line 1520 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 35:
-#line 153 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.wordstr) = (yyvsp[-2].wordstr); (yyval.wordstr)->push_back(","); (yyval.wordstr)->insert((yyval.wordstr)->end(), (yyvsp[0].wordstr)->begin(), (yyvsp[0].wordstr)->end()); }
-#line 1526 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 36:
-#line 156 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '+';}
-#line 1532 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 37:
-#line 157 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '-';}
-#line 1538 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 38:
-#line 158 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '*';}
-#line 1544 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 39:
-#line 159 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '/';}
-#line 1550 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 40:
-#line 160 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '^';}
-#line 1556 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 41:
-#line 161 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '>';}
-#line 1562 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 42:
-#line 162 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '<';}
-#line 1568 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 43:
-#line 163 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '!';}
 #line 1574 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 44:
-#line 164 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.character) = '%';}
+  case 30:
+#line 174 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[0].astnode);}
 #line 1580 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
+  case 31:
+#line 175 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = new ASTNode(AST_MINUS);
+                  (yyval.astnode)->addChild((yyvsp[0].astnode));
+                }
+#line 1589 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 179 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GT);}
+#line 1595 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 33:
+#line 180 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LT);}
+#line 1601 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 181 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GEQ);}
+#line 1607 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 35:
+#line 182 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LEQ);}
+#line 1613 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 36:
+#line 183 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_EQ);}
+#line 1619 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 37:
+#line 184 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1625 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 38:
+#line 185 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1631 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 39:
+#line 186 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1637 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 40:
+#line 187 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  if ((yyvsp[-3].astnode)->getType()==AST_LOGICAL_AND) {
+                    (yyval.astnode) = (yyvsp[-3].astnode);
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                  else {
+                    (yyval.astnode) = new ASTNode(AST_LOGICAL_AND);
+                    (yyval.astnode)->addChild((yyvsp[-3].astnode));
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                }
+#line 1653 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 41:
+#line 198 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  if ((yyvsp[-3].astnode)->getType()==AST_LOGICAL_OR) {
+                    (yyval.astnode) = (yyvsp[-3].astnode);
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                  else {
+                    (yyval.astnode) = new ASTNode(AST_LOGICAL_OR);
+                    (yyval.astnode)->addChild((yyvsp[-3].astnode));
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));
+                  }
+                }
+#line 1669 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 42:
+#line 209 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_LOGICAL_NOT); (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1675 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 43:
+#line 210 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                   (yyval.astnode) = (yyvsp[-1].astnode);
+                   string name = getStringFrom((yyvsp[-3].words));
+                   (yyval.astnode)->setName(name.c_str());
+                   (yyval.astnode)->setType(AST_FUNCTION);
+                   if (g_registry.isDef((yyvsp[-3].words)) == false) {
+                     //The symbol is not a function definition, so we can see if it matches a list of pre-defined names
+                     ASTNodeType_t type = g_registry.getFunctionFor(name);
+                     if (type != AST_UNKNOWN) (yyval.astnode)->setType(type);
+                     if (type==AST_FUNCTION_ROOT && g_registry.l3StrCmp(name, "sqrt")) {
+                       //If the number of arguments is wrong, set an error now instead of waiting for later.
+                       if ((yyval.astnode)->getNumChildren() != 1) {
+                         sed_yyerror("The function 'sqrt' takes exactly one argument.");
+                         delete (yyval.astnode);
+                         YYABORT;
+                       }
+                       //Add a '2' node before the existing child.
+                       ASTNode* int2 = new ASTNode(AST_INTEGER);
+                       int2->setValue(2);
+                       (yyval.astnode)->prependChild(int2);
+                     }
+                     if (type==AST_FUNCTION_POWER && g_registry.l3StrCmp(name, "sqr")) {
+                       //Add a '2' node after the existing child.
+                       ASTNode* int2 = new ASTNode(AST_INTEGER);
+                       int2->setValue(2);
+                       (yyval.astnode)->addChild(int2);
+                     }
+                     if (type==AST_FUNCTION_LOG && g_registry.l3StrCmp(name, "log10")) {
+                       //Add a '10' node before the existing child.
+                       ASTNode* int10 = new ASTNode(AST_INTEGER);
+                       int10->setValue(10);
+                       (yyval.astnode)->prependChild(int10);
+                     }
+                     if (type==AST_FUNCTION_LOG && g_registry.l3StrCmp(name, "log")) {
+                       //If there is exactly one argument, change it to ln (since math.log(x) is ln in python).
+                       if ((yyval.astnode)->getNumChildren() == 1) {
+                         (yyval.astnode)->setType(AST_FUNCTION_LN);
+                       }
+                     }
+                   }
+                   if (g_registry.checkNumArguments((yyval.astnode))) YYABORT;
+        }
+#line 1722 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 44:
+#line 252 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                   (yyval.astnode) = new ASTNode(AST_FUNCTION);
+                   string name = getStringFrom((yyvsp[-2].words));
+                   (yyval.astnode)->setName(name.c_str());
+                   ASTNodeType_t type = g_registry.getFunctionFor(name);
+                   if (type != AST_UNKNOWN) (yyval.astnode)->setType(type);
+                   if (g_registry.checkNumArguments((yyval.astnode))) YYABORT;
+        }
+#line 1735 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
   case 45:
-#line 167 "sedml-script.ypp" /* yacc.c:1646  */
-    {}
-#line 1586 "sedml-script.cpp" /* yacc.c:1646  */
+#line 260 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = new ASTNode();
+                  (yyval.astnode)->setType(AST_LINEAR_ALGEBRA_SELECTOR);
+                  (yyval.astnode)->addChild((yyvsp[-3].astnode));
+                  (yyval.astnode)->addChild((yyvsp[-1].astnode));
+                }
+#line 1746 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 46:
+#line 266 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  sed_yyerror("Illegal to define empty square brackets as a selector.");
+                  YYABORT;
+                }
+#line 1755 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 47:
+#line 280 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_LINEAR_ALGEBRA_VECTOR);}
+#line 1761 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 48:
+#line 281 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-1].astnode); (yyval.astnode)->setType(AST_LINEAR_ALGEBRA_VECTOR);}
+#line 1767 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 49:
+#line 284 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_FUNCTION); (yyval.astnode)->addChild((yyvsp[0].astnode)); }
+#line 1773 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 50:
+#line 285 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-2].astnode);  (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1779 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 51:
+#line 286 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = (yyvsp[-4].astnode);
+                  ASTNode* astn = new ASTNode(AST_RELATIONAL_EQ);
+                  astn->setClass("assignment"); //To distinguish it from '=='
+                  astn->addChild((yyvsp[-2].astnode));
+                  astn->addChild((yyvsp[0].astnode));
+                  (yyval.astnode)->addChild(astn);
+                }
+#line 1792 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 52:
+#line 296 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.dict) = new map<const string*, ASTNode*>();}
+#line 1798 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 53:
+#line 297 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.dict) = (yyvsp[-1].dict); }
+#line 1804 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 54:
+#line 300 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.dict) = new map<const string*, ASTNode*>; (*(yyval.dict))[(yyvsp[-2].word)] = (yyvsp[0].astnode);}
+#line 1810 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 55:
+#line 301 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.dict) = (yyvsp[-4].dict);  (*(yyval.dict))[(yyvsp[-2].word)] = (yyvsp[0].astnode);;}
+#line 1816 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1590 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1820 "sedml-script.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1814,7 +2044,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 170 "sedml-script.ypp" /* yacc.c:1906  */
+#line 304 "sedml-script.ypp" /* yacc.c:1906  */
 
 
 

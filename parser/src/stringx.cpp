@@ -46,6 +46,11 @@ string getStringFrom(const vector<string>* name, string cc)
   return retval;
 }
 
+std::string getFinnickyStringFrom(const std::vector<std::string>* name, std::string cc)
+{
+  return getStringFrom(name, cc);
+}
+
 string getStringFrom(const vector<double>& numbers)
 {
   stringstream ret;

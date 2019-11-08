@@ -6,6 +6,7 @@
 #include <sstream>
 #include <set>
 #include <map>
+#include <sbml/math/ASTNode.h>
 #include "sedml-script-namespace.h"
 #include "statement.h"
 
@@ -21,6 +22,7 @@ private:
   std::string              m_workingDirectory;
 
   std::vector<Statement>   m_statements;
+  std::vector<Statement>   m_currStatements;
 
 public:
   Registry();
@@ -30,6 +32,9 @@ public:
   std::vector<int> indents;
   bool midline;
   int currIndent;
+
+  std::string m_indent;
+  std::string m_python;
 
   char* convertFile(const std::string& filename);
   char* convertString(std::string model);
@@ -46,13 +51,18 @@ public:
   char* getSedmlScript() const;
   char* getPython() const;
 
+  std::string getIndent() const;
+
   std::string getError() {return m_error;};
   int getErrorLine() {return m_errorLine;};
   std::vector<std::string> getScriptWarnings() {return m_warnings;};
 
-  bool addEquals(std::vector<const std::string*>* name, std::vector<std::string>* value);
-  bool startBlock(std::vector<const std::string*>* name, std::vector<std::string>* value);
+  bool addEquals(std::vector<const std::string*>* name, ASTNode* value);
+  bool addEquals(std::vector<const std::string*>* name, std::map<const std::string*, ASTNode*>*);
+  bool startBlock(std::vector<const std::string*>* name, ASTNode* value);
   bool endBlock();
+
+  bool isDef(std::vector<const std::string*>* name) const;
 
   //Setting the 'name' attribute
   bool setName(std::vector<const std::string*>* id, std::vector<const std::string*>* is, const std::string* name);
@@ -72,6 +82,14 @@ public:
 
   char* getCharStar(const char* orig);
 
+  ASTNodeType_t getSymbolFor(std::string name) const;
+
+  ASTNodeType_t getFunctionFor(std::string name) const;
+
+  bool l3StrCmp(const std::string & lhs, const std::string & rhs) const;
+  bool checkNumArguments(const ASTNode * function);
+  ASTNode * combineRelationalElements(ASTNode * left, ASTNode * right, ASTNodeType_t type);
+
 private:
   bool parseInput();
   void createPython();
@@ -81,6 +99,11 @@ private:
   void clearAll();
 
   bool file_exists (const std::string& filename);
+
+  void addStatement(const Statement& statement);
+  void startBlock(const Statement& statement);
+
+
 
 };
 
