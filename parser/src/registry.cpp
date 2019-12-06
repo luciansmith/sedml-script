@@ -105,7 +105,26 @@ char* Registry::convertFile(const string& filename)
   if (lastslash!=string::npos) {
     m_workingDirectory.erase(lastslash+1, m_workingDirectory.size()-lastslash-1);
   }
-  return NULL;
+  clearAll();
+  ifstream* inputfile = new ifstream();
+  inputfile->open(file.c_str(), ios::in);
+  if (!inputfile->is_open() || !inputfile->good()) {
+    string error = "Input file '";
+    error += filename;
+    error += "' cannot be read.  Check to see if the file exists and that the permissions are correct, and try again.  If this still does not work, contact us letting us know how you got this error.";
+    setError(error, 0);
+    delete inputfile;
+    return NULL;
+  }
+  input = inputfile;
+  sed_yylloc_last_line = 1;
+  if (parseInput()) {
+    return NULL;
+  }
+  createPython();
+  char* ret = getPython();
+  m_workingDirectory = old_wd;
+  return ret;
 }
 
 bool Registry::addEquals(std::vector<const std::string*>* name, ASTNode* value)
@@ -200,6 +219,12 @@ void Registry::addNodesFrom(ASTNode * node)
   m_usedNodes.insert(type);
   for (unsigned int c = 0; c < node->getNumChildren(); c++) {
     addNodesFrom(node->getChild(c));
+  }
+  if (node->isInfinity()) {
+    m_hasInf = true;
+  }
+  if (node->isNaN()) {
+    m_hasNaN = true;
   }
 }
 
@@ -469,6 +494,8 @@ void Registry::clearAll()
   m_currStatements.clear();
   m_statements.clear();
   m_usedNodes.clear();
+  m_hasInf = false;
+  m_hasNaN = false;
 }
 
 bool Registry::file_exists (const string& filename)

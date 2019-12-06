@@ -1,0 +1,7 @@
+if x:
+  if y:
+    q=3
+  p=y
+  d=z
+  u=l
+g=3
