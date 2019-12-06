@@ -32,12 +32,17 @@ Registry::Registry()
   , m_warnings()
   , m_workingDirectory("")
   , m_statements()
+  , m_currStatements()
+  , m_usedNodes()
+  , m_hasInf(false)
+  , m_hasNaN(false)
+  , m_python_library(pl_roadrunner)
   , input(NULL)
   , indents()
   , midline(false)
   , currIndent(0)
   , m_indent("   ")
-  , m_python("")
+  , m_python_header("")
 {
 }
 
@@ -69,7 +74,8 @@ char * Registry::getSedmlScript() const
 
 char * Registry::getPython() const
 {
-  return g_registry.getCharStar(m_python.c_str());
+  string full = m_python_header + m_sedml_script;
+  return g_registry.getCharStar(full.c_str());
 }
 
 string Registry::getIndent() const
@@ -108,13 +114,9 @@ bool Registry::addEquals(std::vector<const std::string*>* name, ASTNode* value)
   statement.setType(stEquals);
   statement.setTarget(name);
   statement.setFormula(value);
-  m_statements.push_back(statement);
+  addStatement(statement);
+//  m_statements.push_back(statement);
   cout << "Parsing an equals line." << endl;
-  return false;
-}
-
-bool Registry::addEquals(std::vector<const std::string*>* name, std::map<const std::string*, ASTNode*>*)
-{
   return false;
 }
 
@@ -192,6 +194,14 @@ const string* Registry::addWord(string word)
   return &(*wordit);
 }
 
+void Registry::addNodesFrom(ASTNode * node)
+{
+  ASTNodeType_t type = node->getType();
+  m_usedNodes.insert(type);
+  for (unsigned int c = 0; c < node->getNumChildren(); c++) {
+    addNodesFrom(node->getChild(c));
+  }
+}
 
 bool Registry::finalize()
 {
@@ -232,10 +242,170 @@ bool Registry::parseInput()
 
 void Registry::createPython()
 {
-  m_python = "";
+  createSedmlScript();
+  m_python_header = "# -*- coding: utf-8 -*-\n";
+  m_python_header += "\"\"\"\n";
+  m_python_header += "\n";
+  m_python_header += "Created by libsedmlscript ";
+  m_python_header += LIBSEDMLSCRIPT_VERSION_STRING;
+  m_python_header += "\n";
+  m_python_header += "\"\"\"\n";
+  m_python_header += "\n";
+  m_python_header += "";
+
+  switch (m_python_library) {
+  case pl_roadrunner:
+    m_python_header += "from sed_roadrunner import model, task, plot\n\n";
+  }
+  string mathline = "from math import";
+  string mpmathline = "from mpmath import";
+  string avogadroline = "";
+  string piecewise = "";
+  for (set<ASTNodeType_t>::iterator type = m_usedNodes.begin(); type != m_usedNodes.end(); type++) {
+    switch (*type) {
+    case AST_NAME_AVOGADRO:
+      avogadroline += "avogadro = 6.02214179e+23";
+      break;
+    case AST_CONSTANT_E:
+      mathline += ", e as exponentiale";
+      break;
+    case AST_CONSTANT_PI:
+      mathline += ", pi";
+      break;
+    case AST_FUNCTION_ARCCOS:
+      mathline += ", acos";
+      break;
+    case AST_FUNCTION_ARCCOSH:
+      mathline += ", acosh";
+      break;
+    case AST_FUNCTION_ARCCOT:
+      mathline += ", acot";
+      break;
+    case AST_FUNCTION_ARCCOTH:
+      mpmathline += ", acoth";
+      break;
+    case AST_FUNCTION_ARCCSC:
+      mpmathline += ", acsc";
+      break;
+    case AST_FUNCTION_ARCCSCH:
+      mpmathline += ", acsch";
+      break;
+    case AST_FUNCTION_ARCSEC:
+      mpmathline += ", asec";
+      break;
+    case AST_FUNCTION_ARCSECH:
+      mpmathline += ", asech";
+      break;
+    case AST_FUNCTION_ARCSIN:
+      mathline += ", asin";
+      break;
+    case AST_FUNCTION_ARCSINH:
+      mathline += ", asinh";
+      break;
+    case AST_FUNCTION_ARCTAN:
+      mathline += ", atan";
+      break;
+    case AST_FUNCTION_ARCTANH:
+      mathline += ", atanh";
+      break;
+    case AST_FUNCTION_CEILING:
+      mathline += ", ceil";
+      break;
+    case AST_FUNCTION_COS:
+      mathline += ", cos";
+      break;
+    case AST_FUNCTION_COSH:
+      mathline += ", cosh";
+      break;
+    case AST_FUNCTION_COT:
+      mpmathline += ", cot";
+      break;
+    case AST_FUNCTION_COTH:
+      mpmathline += ", coth";
+      break;
+    case AST_FUNCTION_CSC:
+      mpmathline += ", csc";
+      break;
+    case AST_FUNCTION_CSCH:
+      mpmathline += ", csch";
+      break;
+    case AST_FUNCTION_EXP:
+      mathline += ", exp";
+      break;
+    case AST_FUNCTION_FACTORIAL:
+      mathline += ", factorial";
+      break;
+    case AST_FUNCTION_FLOOR:
+      mathline += ", floor";
+      break;
+    case AST_FUNCTION_LN:
+    case AST_FUNCTION_LOG:
+      mathline += ", log";
+      break;
+    case AST_FUNCTION_SEC:
+      mpmathline += ", sec";
+      break;
+    case AST_FUNCTION_SECH:
+      mpmathline += ", sech";
+      break;
+    case AST_FUNCTION_SIN:
+      mathline += ", sin";
+      break;
+    case AST_FUNCTION_SINH:
+      mathline += ", sinh";
+      break;
+    case AST_FUNCTION_TAN:
+      mathline += ", tan";
+      break;
+    case AST_FUNCTION_TANH:
+      mathline += ", tanh";
+      break;
+    case AST_FUNCTION_PIECEWISE:
+      piecewise = 
+        "def piecewise(*args):\n"
+        "    halfargs = round(len(args)/2 - 0.25)\n"
+        "    for x in range(halfargs):\n"
+        "        if args[x*2+1]:\n"
+        "            return args[x*2]\n"
+        "    if len(args)>halfargs*2:\n"
+        "        return args[-1]\n"
+        "    return None\n";
+      break;
+    }
+  }
+  if (m_hasInf) {
+    mathline += ", inf as INF";
+  }
+  if (m_hasNaN) {
+    mathline += ", nan as NaN";
+  }
+  if (mathline.find("import,") != string::npos) {
+    mathline.replace(17, 1, "");
+    m_python_header += mathline + "\n";
+  }
+  if (mpmathline.find("import,") != string::npos) {
+    mpmathline.replace(19, 1, "");
+    m_python_header += mpmathline + "\n";
+  }
+  if (avogadroline.size() > 0) {
+    m_python_header += "\n" + avogadroline + "\n";
+  }
+  if (piecewise.size() > 0) {
+    m_python_header += "\n";
+    m_python_header += piecewise + "\n";
+  }
+
+
+
+  m_python_header += "#----------------------------------------------\n\n";
+}
+
+void Registry::createSedmlScript()
+{
+  m_sedml_script = "";
   string indent = "";
   for (size_t snum = 0; snum < m_statements.size(); snum++) {
-    m_python += m_statements[snum].getPython(indent);
+    m_sedml_script += m_statements[snum].getSedmlScript(indent);
   }
 
 }
@@ -298,6 +468,7 @@ void Registry::clearAll()
   m_warnings.clear();
   m_currStatements.clear();
   m_statements.clear();
+  m_usedNodes.clear();
 }
 
 bool Registry::file_exists (const string& filename)

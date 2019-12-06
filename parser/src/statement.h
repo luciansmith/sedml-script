@@ -23,8 +23,7 @@ public:
   bool setTarget(std::vector<const std::string*>* target);
   bool setFormula(ASTNode* formula);
   bool addStatement(Statement statement);
-  bool removeStatement(size_t n);
-  std::string getPython(std::string indent);
+  std::string getSedmlScript(std::string indent);
 
   statement_type getType() const;
   std::vector<std::string> getTarget() const;

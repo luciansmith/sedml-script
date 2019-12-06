@@ -29,5 +29,11 @@ enum statement_type {stEquals, stBlockFor, stBlockIf, stBlockDef, stUnknown};
  */
 enum block_type {btFor = 0, btIf, btDef, btUnknown};
 
+/**
+ * python_library defines the programming environments that this library knows about
+ * for using SED-ML Script.
+ * - pl_roadrunner: The python libroadrunner library.
+ */
+enum python_library {pl_roadrunner = 0};
 
 #endif // ENUMS_H

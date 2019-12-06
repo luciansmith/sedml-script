@@ -64,27 +64,20 @@ bool Statement::addStatement(Statement statement)
   return false;
 }
 
-bool Statement::removeStatement(size_t n)
-{
-  if (m_statements.size() <= n) {
-    //Set an error
-    g_registry.setError("Cannot remove statement because there are not that many statements.", 0);
-    return true;
-  }
-  return false;
-}
-
-string Statement::getPython(string indent)
+string Statement::getSedmlScript(string indent)
 {
   string ret = "";
   if (m_type == stUnknown) {
     return ret;
   }
+  L3ParserSettings l3ps;
+  l3ps.setPythonFormat(PythonFormatWithoutPackagesInNames);
+  l3ps.setParsePackageMath(EM_REMAINING, true);
   if (m_type == stEquals) {
     ret += indent;
     ret += getStringFrom(&m_target);
     ret += " = ";
-    ret += SBML_formulaToL3String(m_formula);
+    ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
     ret += "\n";
     return ret;
   }
@@ -101,11 +94,11 @@ string Statement::getPython(string indent)
     ret += "for ";
     break;
   }
-  ret += SBML_formulaToL3String(m_formula);
+  ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
   ret += ":\n";
   indent += g_registry.getIndent();
   for (size_t snum = 0; snum < m_statements.size(); snum++) {
-    ret += m_statements[snum].getPython(indent);
+    ret += m_statements[snum].getSedmlScript(indent);
   }
   return ret;
 }

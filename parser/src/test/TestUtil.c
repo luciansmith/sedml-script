@@ -61,6 +61,8 @@ void compareFileTranslation(const string& base)
 void compareStringTranslation(const string& phrasedml, const string& sedml)
 {
   char* sed_gen = convertString(phrasedml.c_str());
+  cout << "Original:" << endl << phrasedml << endl;
+  cout << "Translated:" << endl << sed_gen << endl;
 
   //LS DEBUG:  FOR NOW:
   if (g_registry.getError() == "") {

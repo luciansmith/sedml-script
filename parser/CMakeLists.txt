@@ -57,6 +57,11 @@ endif()
 # which language bindings should be build
 #option(WITH_STATIC_NUML     "Use the static version of the libnuml library"      ON )
 #option(WITH_STATIC_SEDML    "Use the static version of the libsedml library"     ON )
+option(WITH_STATIC_SBML     "Use the static version of the libsbml library"      ON )
+option(WITH_LIBSBML_EXPAT  "Set if libsbml was compiled with a separate expat library."  OFF)
+option(WITH_LIBSBML_LIBXML "Set if libsbml was compiled with a separate libxml library." ON)
+option(WITH_LIBSBML_XERCES "Set if libsbml was compiled with a separate xerces library." OFF)
+option(WITH_LIBSBML_COMPRESSION "Set if libsbml was compiled with separate zdll and bzip libraries." OFF)
 
 set(EXTRA_LIBS "" CACHE STRING "Libraries the other libraries depend on that are in non-standard locations" )
 
@@ -130,6 +135,131 @@ endif()
 
 
 set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${EXTRA_LIBS} )
+
+####################################################################
+#
+# Locate libsbml
+#
+
+    find_path(LIBSBML_INSTALL_DIR
+    NAMES include/sbml/SBMLTypes.h
+    PATHS /usr /usr/local /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR}
+              ${CMAKE_SOURCE_DIR}/dependencies/
+              ${CMAKE_SOURCE_DIR}/../libsbml-5/release/
+              ${CMAKE_SOURCE_DIR}/../
+              )
+
+    if(WITH_STATIC_SBML)
+        find_library(LIBSBML_LIBRARY
+             NAMES libsbml-static.lib libsbml-static.so libsbml-static sbml-static.lib sbml-static.so sbml-static
+             PATHS /usr/lib /usr/local/lib
+               ${LIBSBML_INSTALL_DIR}/lib
+               ${CMAKE_SOURCE_DIR}
+               ${CMAKE_SOURCE_DIR}/dependencies/lib
+               ${CMAKE_SOURCE_DIR}/../libsbml-5/release/lib/
+             )
+    else()
+        find_library(LIBSBML_LIBRARY 
+            NAMES libsbml.lib libsbml.so libsbml sbml.lib sbml.so sbml
+            PATHS /usr/lib /usr/local/lib 
+              ${LIBSBML_INSTALL_DIR}/lib
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${CMAKE_SOURCE_DIR}/../libsbml-5/release/lib/
+            )
+    endif()
+    find_path(LIBSBML_INCLUDE_DIR
+        NAMES sbml/SBMLTypes.h
+        PATHS /usr/include /usr/local/include 
+              ${LIBSBML_INSTALL_DIR}/include
+              ${CMAKE_SOURCE_DIR}/include 
+              ${CMAKE_SOURCE_DIR}/dependencies/include
+              ${CMAKE_SOURCE_DIR}/../libsbml-5/release/include/
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${LIBSBML_LIBRARY} )
+    if(WIN32 AND NOT WITH_STATIC_SBML)
+        find_path(LIBSBML_BIN_DIR
+            NAMES libsbml.dll
+            PATHS /usr/bin /usr/local/bin
+                  ${LIBSBML_INSTALL_DIR}/bin
+                  ${LIBSBML_INCLUDE_DIR}/../bin
+                  ${CMAKE_SOURCE_DIR}/ 
+                  ${CMAKE_SOURCE_DIR}/dependencies/libsbml/bin
+                  ${CMAKE_SOURCE_DIR}/../libsbml-5/release/bin/
+            )
+        set(LIBSBML_DLL ${LIBSBML_BIN_DIR}/libsbml.dll)
+    endif()
+    INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES} ${LIBSBML_INCLUDE_DIR})
+
+###############################################################
+#
+# Locate the libraries libsbml depends on, for static linking.
+#
+
+if(WITH_LIBSBML_EXPAT)
+    find_library(EXPAT_LIBRARY 
+        NAMES libexpat.lib libexpat.so libexpat.dylib libexpat expat.lib expat.so expat.dylib expat
+	PATHS /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${LIBSBML_INCLUDE_DIR}/../lib
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${EXPAT_LIBRARY} )
+endif()
+
+if(WITH_LIBSBML_LIBXML)
+    find_library(LIBXML_LIBRARY 
+        NAMES libxml2.lib libxml2.so libxml2.dylib libxml2
+	PATHS /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${LIBSBML_INCLUDE_DIR}/../lib
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${LIBXML_LIBRARY} )
+
+    if(WIN32)
+      find_library(ICONV_LIBRARY 
+          NAMES iconv.lib iconv.so iconv.dylib iconv libiconv.lib libiconv.so libiconv.dylib libiconv
+          PATHS /usr/lib /usr/local/lib 
+                ${CMAKE_SOURCE_DIR} 
+                ${CMAKE_SOURCE_DIR}/dependencies/lib
+                ${LIBSBML_INCLUDE_DIR}/../lib
+          )
+      set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${ICONV_LIBRARY} )
+    endif()
+endif()
+
+if(WITH_LIBSBML_XERCES)
+    find_library(XERCES_LIBRARY 
+        NAMES xerces-c_static_3.lib xerces-c_static_3.so xerces-c_static_3.dylib xerces-c_static_3
+	PATHS /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${LIBSBML_INCLUDE_DIR}/../lib
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${XERCES_LIBRARY} )
+endif()
+
+if(WITH_LIBSBML_COMPRESSION)
+    find_library(ZDLL_LIBRARY 
+        NAMES zdll.lib zdll.so zdll.dylib zdll z
+	PATHS /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${LIBSBML_INCLUDE_DIR}/../lib
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${ZDLL_LIBRARY} )
+
+    find_library(BZIP_LIBRARY 
+        NAMES bzip2.lib bzip2.so bzip2.dylib bzip2 bz2
+	PATHS /usr/lib /usr/local/lib 
+              ${CMAKE_SOURCE_DIR} 
+              ${CMAKE_SOURCE_DIR}/dependencies/lib
+              ${LIBSBML_INCLUDE_DIR}/../lib
+        )
+    set(LIBSEDMLSCRIPT_LIBS ${LIBSEDMLSCRIPT_LIBS} ${BZIP_LIBRARY} )
+endif()
 
 ###############################################################################
 ## Enable support for testing ... can be invoked by running ctest

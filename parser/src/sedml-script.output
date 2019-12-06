@@ -1,8 +1,3 @@
-Terminals unused in grammar
-
-   "=="
-
-
 Grammar
 
     0 $accept: input "end of file"
@@ -52,9 +47,9 @@ Grammar
    36     | node '!' '=' node
    37     | node '<' '>' node
    38     | node '>' '<' node
-   39     | node '&' '&' node
-   40     | node '|' '|' node
-   41     | '!' node
+   39     | node "and" node
+   40     | node "or" node
+   41     | "not" node
    42     | varOrKeyword '(' nodelist ')'
    43     | varOrKeyword '(' ')'
    44     | node '[' node ']'
@@ -78,9 +73,8 @@ Terminals, with rules where they appear
 
 "end of file" (0) 0
 '\n' (10) 8
-'!' (33) 36 41
+'!' (33) 36
 '%' (37) 28
-'&' (38) 39
 '(' (40) 20 42 43
 ')' (41) 20 42 43
 '*' (42) 22 23
@@ -98,19 +92,20 @@ Terminals, with rules where they appear
 ']' (93) 44 45 46 47
 '^' (94) 21
 '{' (123) 51 52
-'|' (124) 40
 '}' (125) 51 52
 error (256) 6
-NOT (258)
-NEG (259)
-UPLUS (260)
-"number" (261) 18
-"element name" (262) 10 11 53 54
-"text string in quotes" (263) 17
-"an error" (264) 7
-"an indentation increase" (265) 16
-"an indentation decrease" (266) 16
-"==" (267)
+"and" (258) 39
+"or" (259) 40
+NOT (260)
+NEG (261)
+UPLUS (262)
+"number" (263) 18
+"element name" (264) 10 11 53 54
+"text string in quotes" (265) 17
+"an error" (266) 7
+"an indentation increase" (267) 16
+"an indentation decrease" (268) 16
+"not" (269) 41
 
 
 Nonterminals, with rules where they appear
@@ -238,11 +233,11 @@ State 9
    17 name: varOrKeyword . varOrKeyword "text string in quotes"
 
     '='             shift, and go to state 13
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '.'             shift, and go to state 18
     '('             shift, and go to state 19
 
@@ -283,12 +278,12 @@ State 13
    13       | varOrKeyword '=' . vector
    14       | varOrKeyword '=' . dictionary
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
     '['             shift, and go to state 24
-    "number"        shift, and go to state 17
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
     '{'             shift, and go to state 25
 
@@ -300,13 +295,13 @@ State 13
 
 State 14
 
-   41 node: '!' . node
+   30 node: '-' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -315,13 +310,13 @@ State 14
 
 State 15
 
-   30 node: '-' . node
+   29 node: '+' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -330,24 +325,24 @@ State 15
 
 State 16
 
-   29 node: '+' . node
+   18 node: "number" .
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
-    "element name"  shift, and go to state 4
-    '('             shift, and go to state 19
-
-    varOrKeyword  go to state 26
-    node          go to state 32
+    $default  reduce using rule 18 (node)
 
 
 State 17
 
-   18 node: "number" .
+   41 node: "not" . node
 
-    $default  reduce using rule 18 (node)
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
+    "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
+    '('             shift, and go to state 19
+
+    varOrKeyword  go to state 26
+    node          go to state 32
 
 
 State 18
@@ -361,11 +356,11 @@ State 19
 
    20 node: '(' . node ')'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -406,25 +401,25 @@ State 21
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-    ':'  shift, and go to state 50
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
+    ':'    shift, and go to state 50
 
 
 State 22
@@ -446,11 +441,11 @@ State 24
    46 vector: '[' . ']'
    47       | '[' . nodelist ']'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
     ']'             shift, and go to state 51
 
@@ -502,24 +497,24 @@ State 27
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 12 (equals)
 
@@ -548,36 +543,6 @@ State 30
    26     | node . '/' '/' node
    27     | node . '-' node
    28     | node . '%' node
-   31     | node . '>' node
-   32     | node . '<' node
-   33     | node . '>' '=' node
-   34     | node . '<' '=' node
-   35     | node . '=' '=' node
-   36     | node . '!' '=' node
-   37     | node . '<' '>' node
-   38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
-   41     | '!' node .
-   44     | node . '[' node ']'
-   45     | node . '[' ']'
-
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-
-    $default  reduce using rule 41 (node)
-
-
-State 31
-
-   21 node: node . '^' node
-   22     | node . '*' '*' node
-   23     | node . '*' node
-   24     | node . '+' node
-   25     | node . '/' node
-   26     | node . '/' '/' node
-   27     | node . '-' node
-   28     | node . '%' node
    30     | '-' node .
    31     | node . '>' node
    32     | node . '<' node
@@ -587,8 +552,8 @@ State 31
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -598,7 +563,7 @@ State 31
     $default  reduce using rule 30 (node)
 
 
-State 32
+State 31
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -617,8 +582,8 @@ State 32
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -626,6 +591,36 @@ State 32
     '['  shift, and go to state 49
 
     $default  reduce using rule 29 (node)
+
+
+State 32
+
+   21 node: node . '^' node
+   22     | node . '*' '*' node
+   23     | node . '*' node
+   24     | node . '+' node
+   25     | node . '/' node
+   26     | node . '/' '/' node
+   27     | node . '-' node
+   28     | node . '%' node
+   31     | node . '>' node
+   32     | node . '<' node
+   33     | node . '>' '=' node
+   34     | node . '<' '=' node
+   35     | node . '=' '=' node
+   36     | node . '!' '=' node
+   37     | node . '<' '>' node
+   38     | node . '>' '<' node
+   39     | node . "and" node
+   40     | node . "or" node
+   41     | "not" node .
+   44     | node . '[' node ']'
+   45     | node . '[' ']'
+
+    '^'  shift, and go to state 48
+    '['  shift, and go to state 49
+
+    $default  reduce using rule 41 (node)
 
 
 State 33
@@ -654,25 +649,25 @@ State 34
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-    ')'  shift, and go to state 57
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
+    ')'    shift, and go to state 57
 
 
 State 35
@@ -687,11 +682,11 @@ State 36
    42 node: varOrKeyword '(' . nodelist ')'
    43     | varOrKeyword '(' . ')'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
     ')'             shift, and go to state 58
 
@@ -702,16 +697,32 @@ State 36
 
 State 37
 
-   39 node: node '&' . '&' node
+   39 node: node "and" . node
 
-    '&'  shift, and go to state 60
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
+    "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
+    '('             shift, and go to state 19
+
+    varOrKeyword  go to state 26
+    node          go to state 60
 
 
 State 38
 
-   40 node: node '|' . '|' node
+   40 node: node "or" . node
 
-    '|'  shift, and go to state 61
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
+    "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
+    '('             shift, and go to state 19
+
+    varOrKeyword  go to state 26
+    node          go to state 61
 
 
 State 39
@@ -722,11 +733,11 @@ State 39
 
     '>'             shift, and go to state 62
     '='             shift, and go to state 63
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -741,11 +752,11 @@ State 40
 
     '<'             shift, and go to state 65
     '='             shift, and go to state 66
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -770,11 +781,11 @@ State 43
 
    27 node: node '-' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -785,11 +796,11 @@ State 44
 
    24 node: node '+' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -801,12 +812,12 @@ State 45
    22 node: node '*' . '*' node
    23     | node '*' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
     '*'             shift, and go to state 72
-    "number"        shift, and go to state 17
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -818,12 +829,12 @@ State 46
    25 node: node '/' . node
    26     | node '/' . '/' node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
     '/'             shift, and go to state 74
-    "number"        shift, and go to state 17
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -834,11 +845,11 @@ State 47
 
    28 node: node '%' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -849,11 +860,11 @@ State 48
 
    21 node: node '^' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
@@ -865,11 +876,11 @@ State 49
    44 node: node '[' . node ']'
    45     | node '[' . ']'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
     ']'             shift, and go to state 78
 
@@ -912,25 +923,25 @@ State 52
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
    48 nodelist: node .
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 48 (nodelist)
 
@@ -994,62 +1005,110 @@ State 59
 
 State 60
 
-   39 node: node '&' '&' . node
+   21 node: node . '^' node
+   22     | node . '*' '*' node
+   23     | node . '*' node
+   24     | node . '+' node
+   25     | node . '/' node
+   26     | node . '/' '/' node
+   27     | node . '-' node
+   28     | node . '%' node
+   31     | node . '>' node
+   32     | node . '<' node
+   33     | node . '>' '=' node
+   34     | node . '<' '=' node
+   35     | node . '=' '=' node
+   36     | node . '!' '=' node
+   37     | node . '<' '>' node
+   38     | node . '>' '<' node
+   39     | node . "and" node
+   39     | node "and" node .
+   40     | node . "or" node
+   44     | node . '[' node ']'
+   45     | node . '[' ']'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
-    "element name"  shift, and go to state 4
-    '('             shift, and go to state 19
+    '<'  shift, and go to state 39
+    '>'  shift, and go to state 40
+    '='  shift, and go to state 41
+    '!'  shift, and go to state 42
+    '-'  shift, and go to state 43
+    '+'  shift, and go to state 44
+    '*'  shift, and go to state 45
+    '/'  shift, and go to state 46
+    '%'  shift, and go to state 47
+    '^'  shift, and go to state 48
+    '['  shift, and go to state 49
 
-    varOrKeyword  go to state 26
-    node          go to state 87
+    $default  reduce using rule 39 (node)
 
 
 State 61
 
-   40 node: node '|' '|' . node
+   21 node: node . '^' node
+   22     | node . '*' '*' node
+   23     | node . '*' node
+   24     | node . '+' node
+   25     | node . '/' node
+   26     | node . '/' '/' node
+   27     | node . '-' node
+   28     | node . '%' node
+   31     | node . '>' node
+   32     | node . '<' node
+   33     | node . '>' '=' node
+   34     | node . '<' '=' node
+   35     | node . '=' '=' node
+   36     | node . '!' '=' node
+   37     | node . '<' '>' node
+   38     | node . '>' '<' node
+   39     | node . "and" node
+   40     | node . "or" node
+   40     | node "or" node .
+   44     | node . '[' node ']'
+   45     | node . '[' ']'
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
-    "element name"  shift, and go to state 4
-    '('             shift, and go to state 19
+    '<'  shift, and go to state 39
+    '>'  shift, and go to state 40
+    '='  shift, and go to state 41
+    '!'  shift, and go to state 42
+    '-'  shift, and go to state 43
+    '+'  shift, and go to state 44
+    '*'  shift, and go to state 45
+    '/'  shift, and go to state 46
+    '%'  shift, and go to state 47
+    '^'  shift, and go to state 48
+    '['  shift, and go to state 49
 
-    varOrKeyword  go to state 26
-    node          go to state 88
+    $default  reduce using rule 40 (node)
 
 
 State 62
 
    37 node: node '<' '>' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 89
+    node          go to state 87
 
 
 State 63
 
    34 node: node '<' '=' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 90
+    node          go to state 88
 
 
 State 64
@@ -1071,8 +1130,8 @@ State 64
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1091,30 +1150,30 @@ State 65
 
    38 node: node '>' '<' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 91
+    node          go to state 89
 
 
 State 66
 
    33 node: node '>' '=' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 92
+    node          go to state 90
 
 
 State 67
@@ -1136,8 +1195,8 @@ State 67
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1156,30 +1215,30 @@ State 68
 
    35 node: node '=' '=' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 93
+    node          go to state 91
 
 
 State 69
 
    36 node: node '!' '=' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 94
+    node          go to state 92
 
 
 State 70
@@ -1201,8 +1260,8 @@ State 70
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1234,8 +1293,8 @@ State 71
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1252,15 +1311,15 @@ State 72
 
    22 node: node '*' '*' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 95
+    node          go to state 93
 
 
 State 73
@@ -1282,8 +1341,8 @@ State 73
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1297,15 +1356,15 @@ State 74
 
    26 node: node '/' '/' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 96
+    node          go to state 94
 
 
 State 75
@@ -1327,8 +1386,8 @@ State 75
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1357,8 +1416,8 @@ State 76
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1387,8 +1446,8 @@ State 77
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1423,33 +1482,33 @@ State 79
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    44     | node '[' node . ']'
    45     | node . '[' ']'
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-    ']'  shift, and go to state 97
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
+    ']'    shift, and go to state 95
 
 
 State 80
 
    16 block: varOrKeyword node ':' lineend . "an indentation increase" $@1 input "an indentation decrease"
 
-    "an indentation increase"  shift, and go to state 98
+    "an indentation increase"  shift, and go to state 96
 
 
 State 81
@@ -1464,37 +1523,37 @@ State 82
    49 nodelist: nodelist ',' . node
    50         | nodelist ',' . node '=' node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 99
+    node          go to state 97
 
 
 State 83
 
    53 nodecolonlist: "element name" ':' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 100
+    node          go to state 98
 
 
 State 84
 
    54 nodecolonlist: nodecolonlist ',' . "element name" ':' node
 
-    "element name"  shift, and go to state 101
+    "element name"  shift, and go to state 99
 
 
 State 85
@@ -1528,17 +1587,13 @@ State 87
    35     | node . '=' '=' node
    36     | node . '!' '=' node
    37     | node . '<' '>' node
+   37     | node '<' '>' node .
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   39     | node '&' '&' node .
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
     '-'  shift, and go to state 43
     '+'  shift, and go to state 44
     '*'  shift, and go to state 45
@@ -1547,7 +1602,7 @@ State 87
     '^'  shift, and go to state 48
     '['  shift, and go to state 49
 
-    $default  reduce using rule 39 (node)
+    $default  reduce using rule 37 (node)
 
 
 State 88
@@ -1564,20 +1619,16 @@ State 88
    32     | node . '<' node
    33     | node . '>' '=' node
    34     | node . '<' '=' node
+   34     | node '<' '=' node .
    35     | node . '=' '=' node
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
-   40     | node '|' '|' node .
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
     '-'  shift, and go to state 43
     '+'  shift, and go to state 44
     '*'  shift, and go to state 45
@@ -1586,7 +1637,7 @@ State 88
     '^'  shift, and go to state 48
     '['  shift, and go to state 49
 
-    $default  reduce using rule 40 (node)
+    $default  reduce using rule 34 (node)
 
 
 State 89
@@ -1606,80 +1657,10 @@ State 89
    35     | node . '=' '=' node
    36     | node . '!' '=' node
    37     | node . '<' '>' node
-   37     | node '<' '>' node .
-   38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
-   44     | node . '[' node ']'
-   45     | node . '[' ']'
-
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-
-    $default  reduce using rule 37 (node)
-
-
-State 90
-
-   21 node: node . '^' node
-   22     | node . '*' '*' node
-   23     | node . '*' node
-   24     | node . '+' node
-   25     | node . '/' node
-   26     | node . '/' '/' node
-   27     | node . '-' node
-   28     | node . '%' node
-   31     | node . '>' node
-   32     | node . '<' node
-   33     | node . '>' '=' node
-   34     | node . '<' '=' node
-   34     | node '<' '=' node .
-   35     | node . '=' '=' node
-   36     | node . '!' '=' node
-   37     | node . '<' '>' node
-   38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
-   44     | node . '[' node ']'
-   45     | node . '[' ']'
-
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
-
-    $default  reduce using rule 34 (node)
-
-
-State 91
-
-   21 node: node . '^' node
-   22     | node . '*' '*' node
-   23     | node . '*' node
-   24     | node . '+' node
-   25     | node . '/' node
-   26     | node . '/' '/' node
-   27     | node . '-' node
-   28     | node . '%' node
-   31     | node . '>' node
-   32     | node . '<' node
-   33     | node . '>' '=' node
-   34     | node . '<' '=' node
-   35     | node . '=' '=' node
-   36     | node . '!' '=' node
-   37     | node . '<' '>' node
    38     | node . '>' '<' node
    38     | node '>' '<' node .
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1694,7 +1675,7 @@ State 91
     $default  reduce using rule 38 (node)
 
 
-State 92
+State 90
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1713,8 +1694,8 @@ State 92
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1729,7 +1710,7 @@ State 92
     $default  reduce using rule 33 (node)
 
 
-State 93
+State 91
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1748,8 +1729,8 @@ State 93
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1764,7 +1745,7 @@ State 93
     $default  reduce using rule 35 (node)
 
 
-State 94
+State 92
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1783,8 +1764,8 @@ State 94
    36     | node '!' '=' node .
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1799,7 +1780,7 @@ State 94
     $default  reduce using rule 36 (node)
 
 
-State 95
+State 93
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1818,8 +1799,8 @@ State 95
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1829,7 +1810,7 @@ State 95
     $default  reduce using rule 22 (node)
 
 
-State 96
+State 94
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1848,8 +1829,8 @@ State 96
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
 
@@ -1859,23 +1840,23 @@ State 96
     $default  reduce using rule 26 (node)
 
 
-State 97
+State 95
 
    44 node: node '[' node ']' .
 
     $default  reduce using rule 44 (node)
 
 
-State 98
+State 96
 
    16 block: varOrKeyword node ':' lineend "an indentation increase" . $@1 input "an indentation decrease"
 
     $default  reduce using rule 15 ($@1)
 
-    $@1  go to state 102
+    $@1  go to state 100
 
 
-State 99
+State 97
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1893,31 +1874,31 @@ State 99
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
    49 nodelist: nodelist ',' node .
    50         | nodelist ',' node . '=' node
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 103
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 101
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 49 (nodelist)
 
 
-State 100
+State 98
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -1935,78 +1916,78 @@ State 100
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
    53 nodecolonlist: "element name" ':' node .
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 53 (nodecolonlist)
 
 
-State 101
+State 99
 
    54 nodecolonlist: nodecolonlist ',' "element name" . ':' node
 
-    ':'  shift, and go to state 104
+    ':'  shift, and go to state 102
 
 
-State 102
+State 100
 
    16 block: varOrKeyword node ':' lineend "an indentation increase" $@1 . input "an indentation decrease"
 
     $default  reduce using rule 1 (input)
 
-    input  go to state 105
+    input  go to state 103
 
 
-State 103
+State 101
 
    35 node: node '=' . '=' node
    50 nodelist: nodelist ',' node '=' . node
 
     '='             shift, and go to state 68
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 106
+    node          go to state 104
 
 
-State 104
+State 102
 
    54 nodecolonlist: nodecolonlist ',' "element name" ':' . node
 
-    '!'             shift, and go to state 14
-    '-'             shift, and go to state 15
-    '+'             shift, and go to state 16
-    "number"        shift, and go to state 17
+    '-'             shift, and go to state 14
+    '+'             shift, and go to state 15
+    "number"        shift, and go to state 16
     "element name"  shift, and go to state 4
+    "not"           shift, and go to state 17
     '('             shift, and go to state 19
 
     varOrKeyword  go to state 26
-    node          go to state 107
+    node          go to state 105
 
 
-State 105
+State 103
 
     2 input: input . equals lineend
     3      | input . block
@@ -2019,7 +2000,7 @@ State 105
     error                      shift, and go to state 3
     "element name"             shift, and go to state 4
     "an error"                 shift, and go to state 5
-    "an indentation decrease"  shift, and go to state 108
+    "an indentation decrease"  shift, and go to state 106
     '\n'                       shift, and go to state 6
     ';'                        shift, and go to state 7
 
@@ -2030,7 +2011,7 @@ State 105
     name          go to state 12
 
 
-State 106
+State 104
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -2048,30 +2029,30 @@ State 106
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
    50 nodelist: nodelist ',' node '=' node .
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 50 (nodelist)
 
 
-State 107
+State 105
 
    21 node: node . '^' node
    22     | node . '*' '*' node
@@ -2089,30 +2070,30 @@ State 107
    36     | node . '!' '=' node
    37     | node . '<' '>' node
    38     | node . '>' '<' node
-   39     | node . '&' '&' node
-   40     | node . '|' '|' node
+   39     | node . "and" node
+   40     | node . "or" node
    44     | node . '[' node ']'
    45     | node . '[' ']'
    54 nodecolonlist: nodecolonlist ',' "element name" ':' node .
 
-    '&'  shift, and go to state 37
-    '|'  shift, and go to state 38
-    '<'  shift, and go to state 39
-    '>'  shift, and go to state 40
-    '='  shift, and go to state 41
-    '!'  shift, and go to state 42
-    '-'  shift, and go to state 43
-    '+'  shift, and go to state 44
-    '*'  shift, and go to state 45
-    '/'  shift, and go to state 46
-    '%'  shift, and go to state 47
-    '^'  shift, and go to state 48
-    '['  shift, and go to state 49
+    "and"  shift, and go to state 37
+    "or"   shift, and go to state 38
+    '<'    shift, and go to state 39
+    '>'    shift, and go to state 40
+    '='    shift, and go to state 41
+    '!'    shift, and go to state 42
+    '-'    shift, and go to state 43
+    '+'    shift, and go to state 44
+    '*'    shift, and go to state 45
+    '/'    shift, and go to state 46
+    '%'    shift, and go to state 47
+    '^'    shift, and go to state 48
+    '['    shift, and go to state 49
 
     $default  reduce using rule 54 (nodecolonlist)
 
 
-State 108
+State 106
 
    16 block: varOrKeyword node ':' lineend "an indentation increase" $@1 input "an indentation decrease" .
 

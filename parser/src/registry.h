@@ -24,6 +24,11 @@ private:
   std::vector<Statement>   m_statements;
   std::vector<Statement>   m_currStatements;
 
+  std::set<ASTNodeType_t>  m_usedNodes;
+  bool                     m_hasInf;
+  bool                     m_hasNaN;
+  python_library           m_python_library;
+
 public:
   Registry();
   ~Registry();
@@ -34,7 +39,8 @@ public:
   int currIndent;
 
   std::string m_indent;
-  std::string m_python;
+  std::string m_python_header;
+  std::string m_sedml_script;
 
   char* convertFile(const std::string& filename);
   char* convertString(std::string model);
@@ -58,7 +64,6 @@ public:
   std::vector<std::string> getScriptWarnings() {return m_warnings;};
 
   bool addEquals(std::vector<const std::string*>* name, ASTNode* value);
-  bool addEquals(std::vector<const std::string*>* name, std::map<const std::string*, ASTNode*>*);
   bool startBlock(std::vector<const std::string*>* name, ASTNode* value);
   bool endBlock();
 
@@ -70,6 +75,7 @@ public:
   //Assistance functions
   std::string ftoa(double val);
   const std::string* addWord(std::string word);
+  void addNodesFrom(ASTNode* node);
 
   //ASTNode* parseFormula(const std::string& formula);
 
@@ -93,6 +99,8 @@ public:
 private:
   bool parseInput();
   void createPython();
+
+  void createSedmlScript();
 
   bool checkId(std::vector<const std::string*>* name);
   bool isValidSId(std::vector<const std::string*>* name);
