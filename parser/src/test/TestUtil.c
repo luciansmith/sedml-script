@@ -68,13 +68,13 @@ void compareStringTranslation(const string& scriptml, const string& base)
   cout << "Translated:" << endl << py_gen << endl;
 
   //When creating files originally:
-  //ofstream output;
-  //output.open(pyfile, ios_base::out);
-  //output << py_gen;
-  //output.close();
-  //output.open(scriptfile, ios_base::out);
-  //output << scriptml << "\n";
-  //output.close();
+  ofstream output;
+  output.open(pyfile, ios_base::out);
+  output << py_gen;
+  output.close();
+  output.open(scriptfile, ios_base::out);
+  output << scriptml << "\n";
+  output.close();
 
   fail_unless(g_registry.getError() == "");
 
