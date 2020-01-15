@@ -64,7 +64,10 @@ public:
   std::vector<std::string> getScriptWarnings() {return m_warnings;};
 
   bool addEquals(std::vector<const std::string*>* name, ASTNode* value);
+  bool addSelectedEquals(std::vector<const std::string*>* name, ASTNode* selector, ASTNode* value);
+  bool addExecute(std::vector<const std::string*>* name, ASTNode* value);
   bool startBlock(std::vector<const std::string*>* name, ASTNode* value);
+  bool startForInBlock(ASTNode * variables, ASTNode * from);
   bool endBlock();
 
   bool isDef(std::vector<const std::string*>* name) const;

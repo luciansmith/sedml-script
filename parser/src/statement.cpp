@@ -16,7 +16,8 @@ extern bool CaselessStrCmp(const string& lhs, const string& rhs);
 Statement::Statement()
   : m_type(stUnknown)
   , m_target()
-  , m_formula()
+  , m_formula(NULL)
+  , m_selector(NULL)
   , m_statements()
 {
 }
@@ -57,6 +58,13 @@ bool Statement::setFormula(ASTNode* formula)
   return false;
 }
 
+bool Statement::setSelector(ASTNode* selector)
+{
+  m_selector = selector;
+  //Check stuff.
+  return false;
+}
+
 bool Statement::addStatement(Statement statement)
 {
   m_statements.push_back(statement);
@@ -73,34 +81,58 @@ string Statement::getSedmlScript(string indent)
   L3ParserSettings l3ps;
   l3ps.setPythonFormat(PythonFormatWithoutPackagesInNames);
   l3ps.setParsePackageMath(EM_REMAINING, true);
-  if (m_type == stEquals) {
-    ret += indent;
+  ret += indent;
+  switch (m_type) {
+  case stEquals:
     ret += getStringFrom(&m_target);
+    if (m_selector != NULL) {
+      ret += '[';
+      ret += SBML_formulaToL3StringWithSettings(m_selector, &l3ps);
+      ret += ']';
+    }
     ret += " = ";
     ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
     ret += "\n";
     return ret;
-  }
-  //Otherwise it's a block:
-  ret += indent;
-  switch (m_type) {
-  case stBlockDef:
-    ret += "def ";
-    break;
-  case stBlockIf:
-    ret += "if ";
-    break;
+  case stExecute:
+    ret += getStringFrom(&m_target);
+    ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
+    ret += "\n";
+    return ret;
   case stBlockFor:
-    ret += "for ";
-    break;
+  case stBlockDef:
+  case stBlockIf:
+    switch (m_type) {
+    case stBlockDef:
+      ret += "def ";
+      break;
+    case stBlockIf:
+      ret += "if ";
+      break;
+    case stBlockFor:
+      ret += "for ";
+      if (m_selector != NULL) {
+        if (m_selector->getNumChildren() == 1) {
+          ret += SBML_formulaToL3StringWithSettings(m_selector->getChild(0), &l3ps);
+        }
+        else {
+          ret += SBML_formulaToL3StringWithSettings(m_selector, &l3ps);
+        }
+        ret += " in ";
+      }
+      break;
+    }
+    ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
+    ret += ":\n";
+    indent += g_registry.getIndent();
+    for (size_t snum = 0; snum < m_statements.size(); snum++) {
+      ret += m_statements[snum].getSedmlScript(indent);
+    }
+    return ret;
+  default:
+    assert(false);
+    return ret + "\n";
   }
-  ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
-  ret += ":\n";
-  indent += g_registry.getIndent();
-  for (size_t snum = 0; snum < m_statements.size(); snum++) {
-    ret += m_statements[snum].getSedmlScript(indent);
-  }
-  return ret;
 }
 
 statement_type Statement::getType() const

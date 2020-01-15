@@ -15,7 +15,7 @@
  * - btDef: Function definition.
  * - btUnknown: An unknown or illegal block definition keyword.
  */
-enum statement_type {stEquals, stBlockFor, stBlockIf, stBlockDef, stUnknown};
+enum statement_type {stEquals, stExecute, stBlockFor, stBlockIf, stBlockDef, stUnknown};
 
 
   

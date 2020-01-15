@@ -12,6 +12,7 @@ private:
   statement_type            m_type;
   std::vector<std::string>  m_target;
   ASTNode*                  m_formula;
+  ASTNode*                  m_selector;
   std::vector<Statement>    m_statements;
 
 public:
@@ -22,6 +23,7 @@ public:
   bool setTarget(std::vector<std::string> target);
   bool setTarget(std::vector<const std::string*>* target);
   bool setFormula(ASTNode* formula);
+  bool setSelector(ASTNode * selector);
   bool addStatement(Statement statement);
   std::string getSedmlScript(std::string indent);
 

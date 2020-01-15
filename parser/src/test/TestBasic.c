@@ -91,6 +91,36 @@ START_TEST (test_nested_blocks_staggered_deindent2)
 }
 END_TEST
 
+START_TEST (test_subscript_assignment_num)
+{
+  compareStringTranslation("x[3] = 2", "subscript_assignment_num");
+}
+END_TEST
+
+START_TEST (test_subscript_assignment_var)
+{
+  compareStringTranslation("x[y] = z", "subscript_assignment_var");
+}
+END_TEST
+
+START_TEST (test_subscript_assignment_varsub_if)
+{
+  compareStringTranslation("if True:\n  x[y] = z", "subscript_assignment_varsub_if");
+}
+END_TEST
+
+START_TEST (test_subscript_assignment_varsub_for)
+{
+  compareStringTranslation("for foo in bar:\n  bar[foo] = 3", "subscript_assignment_varsub_for");
+}
+END_TEST
+
+START_TEST (test_execute_onearg)
+{
+  compareStringTranslation("bar(foo)", "execute_onearg");
+}
+END_TEST
+
 
 Suite *
 create_suite_Basic (void)
@@ -98,6 +128,8 @@ create_suite_Basic (void)
   Suite *suite = suite_create("SED-ML Script Basic");
   TCase *tcase = tcase_create("SED-ML Script Basic");
 
+
+  tcase_add_test( tcase, test_execute_onearg);
 
   tcase_add_test( tcase, test_equals_num);
   tcase_add_test( tcase, test_equals_val);
@@ -112,6 +144,11 @@ create_suite_Basic (void)
   tcase_add_test( tcase, test_nested_blocks_then_equals);
   tcase_add_test( tcase, test_nested_blocks_staggered_deindent1);
   tcase_add_test( tcase, test_nested_blocks_staggered_deindent2);
+
+  tcase_add_test( tcase, test_subscript_assignment_num);
+  tcase_add_test( tcase, test_subscript_assignment_var);
+  tcase_add_test( tcase, test_subscript_assignment_varsub_if);
+  tcase_add_test( tcase, test_subscript_assignment_varsub_for);
 
   suite_add_tcase(suite, tcase);
 

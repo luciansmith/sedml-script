@@ -51,6 +51,7 @@ BEGIN_C_DECLS
 Suite *create_suite_Basic(void);
 Suite *create_suite_Errors(void);
 Suite *create_suite_Vectors(void);
+Suite *create_suite_Examples(void);
 
 /**
  * Global.
@@ -121,10 +122,12 @@ main (int argc, char* argv[])
   SRunner *runner = srunner_create( create_suite_Basic() );
   //SRunner *runner = srunner_create( create_suite_Errors() );
   //SRunner *runner = srunner_create( create_suite_Vectors() );
+  //SRunner *runner = srunner_create( create_suite_Examples() );
 
   //srunner_add_suite( runner, create_suite_Basic() );
   //srunner_add_suite( runner, create_suite_Errors() );
   srunner_add_suite( runner, create_suite_Vectors() );
+  srunner_add_suite( runner, create_suite_Examples() );
 
 #ifdef TRACE_MEMORY
   srunner_set_fork_status(runner, CK_NOFORK);

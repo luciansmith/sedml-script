@@ -33,29 +33,36 @@ void compareFileTranslation(const string& base)
     return;
   }
   //cout << "SED-ML generated from " << base << ".txt" << endl << py_gen << endl;
-  char* script_rt = getLastSedmlScript();
+  //char* script_rt = getLastSedmlScript();
 
-  char* script_gen = convertFile(pyfile.c_str());
-  if (script_gen==NULL) {
-    cout << getLastSedmlScriptError() << endl << endl;
-    fail_unless(false);
-    return;
-  }
-  //cout << "script-ML generated from " << base << ".py" << endl << script_gen << endl;
-  char* sed_rt = getLastSEDML();
+  fail_unless(g_registry.getError() == "");
 
-  fail_unless((string)script_rt == (string)script_gen);
-  fail_unless((string)sed_rt     == (string)py_gen);
+  std::ifstream t(pyfile);
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  fail_unless(buffer.str() == (string)py_gen);
+  free(py_gen);
+
+  //char* script_gen = convertFile(pyfile.c_str());
+  //if (script_gen==NULL) {
+  //  cout << getLastSedmlScriptError() << endl << endl;
+  //  fail_unless(false);
+  //  return;
+  //}
+  ////cout << "script-ML generated from " << base << ".py" << endl << script_gen << endl;
+  //char* sed_rt = getLastSEDML();
+
+  //fail_unless((string)script_rt == (string)script_gen);
+  //fail_unless((string)sed_rt     == (string)py_gen);
   //if (sed_rt != py_gen) {
   //  ofstream outfile((dir + base + ".py").c_str());
   //  outfile.write(py_gen, ((string)py_gen).size());
   //  outfile.close();
   //}
 
-  free(py_gen);
-  free(sed_rt);
-  free(script_gen);
-  free(script_rt);
+  //free(sed_rt);
+  //free(script_gen);
+  //free(script_rt);
 }
 
 void compareStringTranslation(const string& scriptml, const string& base)
@@ -68,13 +75,13 @@ void compareStringTranslation(const string& scriptml, const string& base)
   cout << "Translated:" << endl << py_gen << endl;
 
   //When creating files originally:
-  ofstream output;
-  output.open(pyfile, ios_base::out);
-  output << py_gen;
-  output.close();
-  output.open(scriptfile, ios_base::out);
-  output << scriptml << "\n";
-  output.close();
+  //ofstream output;
+  //output.open(pyfile, ios_base::out);
+  //output << py_gen;
+  //output.close();
+  //output.open(scriptfile, ios_base::out);
+  //output << scriptml << "\n";
+  //output.close();
 
   fail_unless(g_registry.getError() == "");
 

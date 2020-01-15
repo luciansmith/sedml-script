@@ -150,7 +150,10 @@ extern int sed_yydebug;
     ERROR = 266,
     INDENT = 267,
     DEINDENT = 268,
-    NOTWORD = 269
+    NOTWORD = 269,
+    FORWORD = 270,
+    INWORD = 271,
+    IFWORD = 272
   };
 #endif
 
@@ -167,7 +170,7 @@ union SED_YYSTYPE
   double number;
   map<const string*, ASTNode*>* dict;
 
-#line 171 "sedml-script.cpp" /* yacc.c:355  */
+#line 174 "sedml-script.cpp" /* yacc.c:355  */
 };
 
 typedef union SED_YYSTYPE SED_YYSTYPE;
@@ -184,7 +187,7 @@ int sed_yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 188 "sedml-script.cpp" /* yacc.c:358  */
+#line 191 "sedml-script.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -426,21 +429,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  2
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   363
+#define YYLAST   476
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  36
+#define YYNTOKENS  39
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  12
+#define YYNNTS  14
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  55
+#define YYNRULES  61
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  108
+#define YYNSTATES  128
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   269
+#define YYMAXUTOK   272
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -450,18 +453,18 @@ union yyalloc
 static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      26,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+      29,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     8,     2,     2,     2,    13,     2,     2,
-      30,    31,    11,    10,    35,     9,    28,    12,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    29,    27,
+      33,    34,    11,    10,    38,     9,    31,    12,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    35,    30,
        5,     7,     6,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,    18,     2,    32,    17,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,    33,     2,    34,     2,     2,     2,     2,
+       2,     2,     2,    36,     2,    37,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -475,19 +478,21 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-      14,    15,    16,    19,    20,    21,    22,    23,    24,    25
+      14,    15,    16,    19,    20,    21,    22,    23,    24,    25,
+      26,    27,    28
 };
 
 #if SED_YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    90,    90,    91,    92,    93,    94,    95,    96,    99,
-     100,   103,   104,   107,   110,   110,   113,   116,   120,   134,
-     135,   136,   137,   148,   159,   160,   167,   168,   173,   174,
-     178,   179,   180,   181,   182,   186,   187,   188,   189,   200,
-     211,   212,   260,   268,   274,   286,   289,   290,   291,   292,
-     293,   296,   297,   298,   308,   319
+       0,    93,    93,    94,    95,    96,    97,    98,    99,   102,
+     103,   106,   107,   109,   110,   113,   114,   117,   118,   121,
+     121,   122,   122,   125,   129,   143,   144,   145,   146,   157,
+     168,   169,   176,   177,   182,   183,   187,   188,   189,   190,
+     191,   195,   196,   197,   198,   209,   219,   220,   268,   276,
+     282,   294,   297,   298,   299,   300,   301,   304,   305,   306,
+     316,   327
 };
 #endif
 
@@ -496,14 +501,16 @@ static const yytype_uint16 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "$undefined", "\"and\"", "\"or\"", "'<'",
-  "'>'", "'='", "'!'", "'-'", "'+'", "'*'", "'/'", "'%'", "NOT", "NEG",
-  "UPLUS", "'^'", "'['", "\"number\"", "\"element name\"",
-  "\"text string in quotes\"", "\"an error\"",
-  "\"an indentation increase\"", "\"an indentation decrease\"", "\"not\"",
-  "'\\n'", "';'", "'.'", "':'", "'('", "')'", "']'", "'{'", "'}'", "','",
-  "$accept", "input", "lineend", "varOrKeyword", "equals", "block", "$@1",
-  "name", "node", "vector", "nodelist", "nodecolonlist", YY_NULLPTR
+  "\"end of file\"", "error", "$undefined", "\"the keyword 'and'\"",
+  "\"the keyword 'or'\"", "'<'", "'>'", "'='", "'!'", "'-'", "'+'", "'*'",
+  "'/'", "'%'", "NOT", "NEG", "UPLUS", "'^'", "'['", "\"number\"",
+  "\"element name\"", "\"text string in quotes\"", "\"an error\"",
+  "\"an indentation increase\"", "\"an indentation decrease\"",
+  "\"the keyword 'not'\"", "\"the keyword 'for'\"", "\"the keyword 'in'\"",
+  "\"the keyword 'if'\"", "'\\n'", "';'", "'.'", "']'", "'('", "')'",
+  "':'", "'{'", "'}'", "','", "$accept", "input", "lineend",
+  "varOrKeyword", "subscriptable", "equals", "execute", "block", "$@1",
+  "$@2", "node", "vector", "nodelist", "nodecolonlist", YY_NULLPTR
 };
 #endif
 
@@ -514,15 +521,15 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,    60,    62,    61,    33,    45,
       43,    42,    47,    37,   260,   261,   262,    94,    91,   263,
-     264,   265,   266,   267,   268,   269,    10,    59,    46,    58,
-      40,    41,    93,   123,   125,    44
+     264,   265,   266,   267,   268,   269,   270,   271,   272,    10,
+      59,    46,    93,    40,    41,    58,   123,   125,    44
 };
 # endif
 
-#define YYPACT_NINF -27
+#define YYPACT_NINF -99
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-27)))
+  (!!((Yystate) == (-99)))
 
 #define YYTABLE_NINF -1
 
@@ -533,17 +540,19 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     -27,   102,   -27,   -27,   -27,   -27,   -27,   -27,   -27,   150,
-     -11,   -27,   -11,   274,   274,   274,   189,   -27,   274,   -17,
-     274,   172,    41,   138,   -27,   -27,   -27,   -26,   305,    14,
-      14,   -27,   305,   -18,    14,   -27,    70,   -20,   -27,    72,
-      77,   -27,   206,   274,   274,   107,    90,    33,    52,   274,
-     274,   223,   240,   274,   274,   257,   -11,   -27,   274,   -27,
-     274,   -27,   -27,    45,   -27,    23,   335,   335,   274,   274,
-     345,   274,   274,   345,   274,   274,    73,    73,   274,    14,
-     274,    14,    14,    14,   -27,    16,    66,   321,   305,    39,
-     -27,   345,   345,   345,   345,   345,   345,    14,    14,   -27,
-     -27,   154,   274,   -27,   305,   305,    29,   -27
+     -99,     5,   -99,   -99,   -99,   -99,   394,   394,   -99,   -99,
+     -99,    37,   -26,   -26,   -99,   394,   394,   280,   -99,   -99,
+     394,   394,   260,   -22,   -13,   428,   -99,   -19,    81,   394,
+     394,    25,   299,   -99,   -99,    11,    11,   -99,   -16,    11,
+     139,    22,   -99,     1,    42,   318,   394,   394,   176,   156,
+      13,    52,   394,   394,   337,   356,   394,   394,   375,   394,
+     394,   -26,   428,   210,   -99,   -99,    -2,   -99,   -99,   394,
+     -99,   -99,    47,   -99,    35,   458,   458,   394,   394,   411,
+     394,   394,   411,   394,   394,    84,    84,   394,    11,   394,
+      11,    11,    11,   -99,   226,   123,   444,    53,    75,   -99,
+     428,    65,   -99,   411,   411,   411,   411,   411,   411,    11,
+      11,   -99,   -26,   241,   -99,   394,   394,    80,   428,   -99,
+     428,   428,   -99,    36,   -99,   -99,   178,   -99
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -551,31 +560,33 @@ static const yytype_int16 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       2,     0,     1,     7,    11,     8,     9,    10,     6,     0,
-       0,     4,     0,     0,     0,     0,     0,    17,     0,     0,
-       0,     0,    18,     0,    45,     3,     5,    18,    13,    29,
-      28,    46,    51,     0,    40,    12,     0,    11,    48,     0,
-       0,    16,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,    47,     0,    19,
-       0,    49,    50,     0,    42,     0,    38,    39,     0,     0,
-      31,     0,     0,    30,     0,     0,    26,    23,     0,    22,
-       0,    24,    27,    20,    44,     0,     0,    52,    54,     0,
-      41,    36,    33,    37,    32,    34,    35,    21,    25,    43,
-      14,     0,     0,     2,    53,    55,     0,    15
+       2,     0,     1,     7,    13,     8,     0,     0,     9,    10,
+       6,     0,     0,     0,     5,     0,     0,     0,    23,    11,
+       0,     0,     0,    24,    12,    57,    51,     0,     0,     0,
+       0,     0,     0,     3,     4,    35,    34,    52,     0,    46,
+       0,    13,    54,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    15,     0,    14,    18,     0,    53,    25,     0,
+      55,    56,     0,    48,     0,    44,    45,     0,     0,    37,
+       0,     0,    36,     0,     0,    32,    29,     0,    28,     0,
+      30,    33,    26,    50,     0,     0,    58,     0,     0,    17,
+      60,     0,    47,    42,    39,    43,    38,    40,    41,    27,
+      31,    49,     0,     0,    19,     0,     0,     0,    59,     2,
+      16,    61,    21,     0,     2,    20,     0,    22
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -27,    -7,     1,    -1,   -27,   -27,   -27,   -27,    -8,   -27,
-      -3,   -27
+     -99,   -98,     0,   -99,    -1,   -99,   -99,   -99,   -99,   -99,
+      -6,   -99,   -15,   -99
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,     8,    27,    10,    11,   103,    12,    32,    24,
-      33,    40
+      -1,     1,    10,    23,    24,    12,    13,    14,   119,   124,
+      25,    26,    27,    44
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -583,123 +594,149 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       9,    23,    19,    35,    42,    28,    29,    30,    22,    60,
-      34,    25,    36,    26,    57,     6,     7,    58,    39,    43,
-      44,    45,    46,    47,    48,    49,    50,    51,    52,    53,
-       3,    54,    55,    54,    55,    66,    67,    70,    73,    65,
-      74,    76,    77,    79,    81,    82,    83,    85,    99,     4,
-      87,     5,    88,   107,    90,     6,     7,    86,    58,    75,
-      91,    92,    41,    93,    94,    89,    95,    96,   102,    19,
-      97,    42,    98,    43,    44,    45,    46,    47,    48,    49,
-      50,    51,    52,    53,    51,    52,    53,    54,    55,   100,
-      54,    55,     0,   104,   105,    71,   106,    72,     0,    14,
-      15,    59,     2,     3,     0,     9,    61,    58,    16,    17,
-       4,    62,    63,    68,    69,    18,    14,    15,     0,     0,
-      20,     0,     4,    21,     5,    16,    17,     4,     6,     7,
-       0,     0,    18,     0,     0,     0,     0,    20,     0,     0,
-      21,    43,    44,    45,    46,    47,    48,    49,    50,    51,
-      52,    53,     0,     0,     0,    54,    55,    13,     0,    14,
-      15,    74,     0,    14,    15,     0,     0,    56,    16,    17,
-       4,     0,    16,    17,     4,    18,     0,     0,    19,    18,
-      20,    14,    15,    21,    20,     0,     0,    21,     0,     0,
-      16,    17,    37,     0,     0,     0,     0,    18,    14,    15,
-       0,     0,    20,     0,     0,    21,    38,    16,    17,     4,
-       0,     0,     0,     0,    18,    14,    15,     0,     0,    20,
-       0,    31,    21,     0,    16,    17,     4,     0,     0,     0,
-       0,    18,    14,    15,    78,     0,    20,    64,     0,    21,
-       0,    16,    17,     4,     0,     0,     0,     0,    18,    14,
-      15,     0,    80,    20,     0,     0,    21,     0,    16,    17,
-       4,     0,     0,     0,     0,    18,    14,    15,     0,     0,
-      20,     0,     0,    21,     0,    16,    17,     4,     0,     0,
-       0,     0,    18,    14,    15,     0,     0,    20,     0,    84,
-      21,     0,    16,    17,     4,     0,     0,     0,     0,    18,
-       0,     0,     0,     0,    20,     0,     0,    21,    43,    44,
-      45,    46,    47,    48,    49,    50,    51,    52,    53,     0,
-       0,     0,    54,    55,    43,    44,    45,    46,   101,    48,
-      49,    50,    51,    52,    53,     0,     0,     0,    54,    55,
-      45,    46,    47,    48,    49,    50,    51,    52,    53,     0,
-       0,     0,    54,    55,    49,    50,    51,    52,    53,     0,
-       0,     0,    54,    55
+      11,    28,    38,     8,     9,     2,     3,    43,    59,    35,
+      36,    45,    33,    34,    39,    40,    67,    66,    31,    60,
+      83,   123,    60,    62,    63,     4,   126,     5,    57,    58,
+      74,     6,    99,     7,     8,     9,    60,     3,    70,    60,
+      75,    76,    79,    82,    29,    64,    85,    86,    88,    90,
+      91,    92,    94,    95,    96,    30,     4,    69,     5,    84,
+     125,    97,     6,   100,     7,     8,     9,   101,    31,   102,
+      32,   103,   104,    60,   105,   106,   114,   107,   108,    71,
+      72,   109,   115,   110,    46,    47,    48,    49,    50,    51,
+      52,    53,    54,    55,    56,    54,    55,    56,    57,    58,
+     116,    57,    58,   122,     0,     0,     0,   118,     0,   120,
+     121,     0,   117,     0,     0,     0,    61,     0,     0,     0,
+       0,     0,    11,     0,     0,    11,    46,    47,    48,    49,
+      50,    51,    52,    53,    54,    55,    56,     0,     0,     0,
+      57,    58,    46,    47,    48,    49,    50,    51,    52,    53,
+      54,    55,    56,     0,     0,     0,    57,    58,   112,     0,
+       0,    80,     0,    81,     0,    15,    16,     0,     0,     0,
+       0,     0,     0,    68,    17,    18,     4,    19,     0,     3,
+       0,    20,    77,    78,     0,    15,    16,     0,     0,    21,
+       0,     0,    22,     0,    17,    18,     4,    19,     4,     0,
+       5,    20,   127,     0,     6,     0,     7,     8,     9,    21,
+       0,     0,    22,    46,    47,    48,    49,    50,    51,    52,
+      53,    54,    55,    56,     0,     0,     0,    57,    58,    46,
+      47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
+       0,     0,    98,    57,    58,     0,     0,     0,    83,     0,
+      15,    16,     0,     0,     0,     0,     0,     0,   111,    17,
+      18,     4,    19,     0,     0,     0,    20,     0,     0,    15,
+      16,     0,     0,     0,    21,     0,     0,    22,    17,    18,
+      41,    19,     0,     0,     0,    20,     0,     0,     0,    15,
+      16,     0,     0,    21,     0,     0,    22,    42,    17,    18,
+       4,    19,     0,     0,     0,    20,     0,     0,    15,    16,
+       0,     0,    37,    21,     0,     0,    22,    17,    18,     4,
+      19,     0,     0,     0,    20,     0,     0,    15,    16,     0,
+       0,     0,    21,    65,     0,    22,    17,    18,     4,    19,
+       0,     0,     0,    20,     0,     0,    15,    16,    87,     0,
+       0,    21,    73,     0,    22,    17,    18,     4,    19,     0,
+       0,     0,    20,     0,     0,    15,    16,     0,    89,     0,
+      21,     0,     0,    22,    17,    18,     4,    19,     0,     0,
+       0,    20,     0,     0,    15,    16,     0,     0,     0,    21,
+       0,     0,    22,    17,    18,     4,    19,     0,     0,     0,
+      20,     0,     0,    15,    16,     0,     0,    93,    21,     0,
+       0,    22,    17,    18,     4,    19,     0,     0,     0,    20,
+      52,    53,    54,    55,    56,     0,     0,    21,    57,    58,
+      22,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,     0,     0,     0,    57,    58,    46,    47,    48,
+      49,   113,    51,    52,    53,    54,    55,    56,     0,     0,
+       0,    57,    58,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,     0,     0,     0,    57,    58
 };
 
 static const yytype_int8 yycheck[] =
 {
-       1,     9,    28,    20,    30,    13,    14,    15,     9,    29,
-      18,    10,    20,    12,    32,    26,    27,    35,    21,     3,
+       1,     7,    17,    29,    30,     0,     1,    22,    27,    15,
+      16,    33,    12,    13,    20,    21,    32,    32,    31,    38,
+       7,   119,    38,    29,    30,    20,   124,    22,    17,    18,
+      45,    26,    34,    28,    29,    30,    38,     1,    37,    38,
+      46,    47,    48,    49,     7,    20,    52,    53,    54,    55,
+      56,    57,    58,    59,    60,    18,    20,    35,    22,     7,
+      24,    61,    26,    69,    28,    29,    30,    20,    31,    34,
+      33,    77,    78,    38,    80,    81,    23,    83,    84,    37,
+      38,    87,     7,    89,     3,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    11,    12,    13,    17,    18,
+      35,    17,    18,    23,    -1,    -1,    -1,   113,    -1,   115,
+     116,    -1,   112,    -1,    -1,    -1,    35,    -1,    -1,    -1,
+      -1,    -1,   123,    -1,    -1,   126,     3,     4,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    -1,    -1,    -1,
+      17,    18,     3,     4,     5,     6,     7,     8,     9,    10,
+      11,    12,    13,    -1,    -1,    -1,    17,    18,    35,    -1,
+      -1,     5,    -1,     7,    -1,     9,    10,    -1,    -1,    -1,
+      -1,    -1,    -1,    34,    18,    19,    20,    21,    -1,     1,
+      -1,    25,     6,     7,    -1,     9,    10,    -1,    -1,    33,
+      -1,    -1,    36,    -1,    18,    19,    20,    21,    20,    -1,
+      22,    25,    24,    -1,    26,    -1,    28,    29,    30,    33,
+      -1,    -1,    36,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    -1,    -1,    -1,    17,    18,     3,
        4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-       1,    17,    18,    17,    18,    43,    44,    45,    46,    42,
-       7,    49,    50,    51,    52,    53,    54,    55,    32,    20,
-      58,    22,    60,    24,    31,    26,    27,    56,    35,     7,
-      68,    69,    21,    71,    72,    20,    74,    75,    29,    28,
-      78,    30,    80,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    11,    12,    13,    17,    18,    23,
-      17,    18,    -1,   101,   102,     5,   103,     7,    -1,     9,
-      10,    31,     0,     1,    -1,   106,    34,    35,    18,    19,
-      20,    34,    35,     6,     7,    25,     9,    10,    -1,    -1,
-      30,    -1,    20,    33,    22,    18,    19,    20,    26,    27,
-      -1,    -1,    25,    -1,    -1,    -1,    -1,    30,    -1,    -1,
-      33,     3,     4,     5,     6,     7,     8,     9,    10,    11,
-      12,    13,    -1,    -1,    -1,    17,    18,     7,    -1,     9,
-      10,     7,    -1,     9,    10,    -1,    -1,    29,    18,    19,
-      20,    -1,    18,    19,    20,    25,    -1,    -1,    28,    25,
-      30,     9,    10,    33,    30,    -1,    -1,    33,    -1,    -1,
-      18,    19,    20,    -1,    -1,    -1,    -1,    25,     9,    10,
-      -1,    -1,    30,    -1,    -1,    33,    34,    18,    19,    20,
-      -1,    -1,    -1,    -1,    25,     9,    10,    -1,    -1,    30,
-      -1,    32,    33,    -1,    18,    19,    20,    -1,    -1,    -1,
-      -1,    25,     9,    10,    11,    -1,    30,    31,    -1,    33,
-      -1,    18,    19,    20,    -1,    -1,    -1,    -1,    25,     9,
-      10,    -1,    12,    30,    -1,    -1,    33,    -1,    18,    19,
-      20,    -1,    -1,    -1,    -1,    25,     9,    10,    -1,    -1,
-      30,    -1,    -1,    33,    -1,    18,    19,    20,    -1,    -1,
-      -1,    -1,    25,     9,    10,    -1,    -1,    30,    -1,    32,
-      33,    -1,    18,    19,    20,    -1,    -1,    -1,    -1,    25,
-      -1,    -1,    -1,    -1,    30,    -1,    -1,    33,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    -1,
-      -1,    -1,    17,    18,     3,     4,     5,     6,     7,     8,
-       9,    10,    11,    12,    13,    -1,    -1,    -1,    17,    18,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    -1,
-      -1,    -1,    17,    18,     9,    10,    11,    12,    13,    -1,
-      -1,    -1,    17,    18
+      -1,    -1,    32,    17,    18,    -1,    -1,    -1,     7,    -1,
+       9,    10,    -1,    -1,    -1,    -1,    -1,    -1,    32,    18,
+      19,    20,    21,    -1,    -1,    -1,    25,    -1,    -1,     9,
+      10,    -1,    -1,    -1,    33,    -1,    -1,    36,    18,    19,
+      20,    21,    -1,    -1,    -1,    25,    -1,    -1,    -1,     9,
+      10,    -1,    -1,    33,    -1,    -1,    36,    37,    18,    19,
+      20,    21,    -1,    -1,    -1,    25,    -1,    -1,     9,    10,
+      -1,    -1,    32,    33,    -1,    -1,    36,    18,    19,    20,
+      21,    -1,    -1,    -1,    25,    -1,    -1,     9,    10,    -1,
+      -1,    -1,    33,    34,    -1,    36,    18,    19,    20,    21,
+      -1,    -1,    -1,    25,    -1,    -1,     9,    10,    11,    -1,
+      -1,    33,    34,    -1,    36,    18,    19,    20,    21,    -1,
+      -1,    -1,    25,    -1,    -1,     9,    10,    -1,    12,    -1,
+      33,    -1,    -1,    36,    18,    19,    20,    21,    -1,    -1,
+      -1,    25,    -1,    -1,     9,    10,    -1,    -1,    -1,    33,
+      -1,    -1,    36,    18,    19,    20,    21,    -1,    -1,    -1,
+      25,    -1,    -1,     9,    10,    -1,    -1,    32,    33,    -1,
+      -1,    36,    18,    19,    20,    21,    -1,    -1,    -1,    25,
+       9,    10,    11,    12,    13,    -1,    -1,    33,    17,    18,
+      36,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    -1,    -1,    -1,    17,    18,     3,     4,     5,
+       6,     7,     8,     9,    10,    11,    12,    13,    -1,    -1,
+      -1,    17,    18,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    -1,    -1,    -1,    17,    18
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    37,     0,     1,    20,    22,    26,    27,    38,    39,
-      40,    41,    43,     7,     9,    10,    18,    19,    25,    28,
-      30,    33,    39,    44,    45,    38,    38,    39,    44,    44,
-      44,    32,    44,    46,    44,    20,    44,    20,    34,    46,
-      47,    21,    30,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    17,    18,    29,    32,    35,    31,
-      29,    34,    34,    35,    31,    46,    44,    44,     6,     7,
-      44,     5,     7,    44,     7,     7,    44,    44,    11,    44,
-      12,    44,    44,    44,    32,    44,    38,    44,    44,    20,
-      31,    44,    44,    44,    44,    44,    44,    44,    44,    32,
-      23,     7,    29,    42,    44,    44,    37,    24
+       0,    40,     0,     1,    20,    22,    26,    28,    29,    30,
+      41,    43,    44,    45,    46,     9,    10,    18,    19,    21,
+      25,    33,    36,    42,    43,    49,    50,    51,    49,     7,
+      18,    31,    33,    41,    41,    49,    49,    32,    51,    49,
+      49,    20,    37,    51,    52,    33,     3,     4,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    17,    18,    27,
+      38,    35,    49,    49,    20,    34,    51,    32,    34,    35,
+      37,    37,    38,    34,    51,    49,    49,     6,     7,    49,
+       5,     7,    49,     7,     7,    49,    49,    11,    49,    12,
+      49,    49,    49,    32,    49,    49,    49,    41,    32,    34,
+      49,    20,    34,    49,    49,    49,    49,    49,    49,    49,
+      49,    32,    35,     7,    23,     7,    35,    41,    49,    47,
+      49,    49,    23,    40,    48,    24,    40,    24
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    36,    37,    37,    37,    37,    37,    37,    37,    38,
-      38,    39,    39,    40,    42,    41,    43,    44,    44,    44,
-      44,    44,    44,    44,    44,    44,    44,    44,    44,    44,
-      44,    44,    44,    44,    44,    44,    44,    44,    44,    44,
-      44,    44,    44,    44,    44,    44,    45,    45,    45,    45,
-      45,    46,    46,    46,    47,    47
+       0,    39,    40,    40,    40,    40,    40,    40,    40,    41,
+      41,    42,    42,    43,    43,    44,    44,    45,    45,    47,
+      46,    48,    46,    49,    49,    49,    49,    49,    49,    49,
+      49,    49,    49,    49,    49,    49,    49,    49,    49,    49,
+      49,    49,    49,    49,    49,    49,    49,    49,    49,    49,
+      49,    49,    50,    50,    50,    50,    50,    51,    51,    51,
+      52,    52
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     3,     2,     3,     2,     2,     2,     1,
-       1,     1,     3,     3,     0,     8,     3,     1,     1,     3,
-       3,     4,     3,     3,     3,     4,     3,     3,     2,     2,
-       3,     3,     4,     4,     4,     4,     4,     4,     3,     3,
-       2,     4,     3,     4,     3,     1,     2,     3,     2,     3,
-       3,     1,     3,     5,     3,     5
+       0,     2,     0,     3,     3,     2,     2,     2,     2,     1,
+       1,     1,     1,     1,     3,     3,     6,     4,     3,     0,
+       8,     0,    10,     1,     1,     3,     3,     4,     3,     3,
+       3,     4,     3,     3,     2,     2,     3,     3,     4,     4,
+       4,     4,     4,     4,     3,     3,     2,     4,     3,     4,
+       3,     1,     2,     3,     2,     3,     3,     1,     3,     5,
+       3,     5
 };
 
 
@@ -1376,100 +1413,136 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 91 "sedml-script.ypp" /* yacc.c:1646  */
+#line 94 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1382 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1419 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 92 "sedml-script.ypp" /* yacc.c:1646  */
+#line 95 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1388 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1425 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 93 "sedml-script.ypp" /* yacc.c:1646  */
+#line 96 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1394 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1431 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 94 "sedml-script.ypp" /* yacc.c:1646  */
+#line 97 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1400 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1437 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 95 "sedml-script.ypp" /* yacc.c:1646  */
+#line 98 "sedml-script.ypp" /* yacc.c:1646  */
     {YYABORT;}
-#line 1406 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1443 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 96 "sedml-script.ypp" /* yacc.c:1646  */
+#line 99 "sedml-script.ypp" /* yacc.c:1646  */
     {YYABORT;}
-#line 1412 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1449 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 99 "sedml-script.ypp" /* yacc.c:1646  */
+#line 102 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1418 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1455 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 100 "sedml-script.ypp" /* yacc.c:1646  */
+#line 103 "sedml-script.ypp" /* yacc.c:1646  */
     {}
-#line 1424 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1461 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 103 "sedml-script.ypp" /* yacc.c:1646  */
+#line 106 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.words) = new vector<const string*>; (yyval.words)->push_back((yyvsp[0].word));}
-#line 1430 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1467 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 104 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.words) = (yyvsp[-2].words); (yyval.words)->push_back((yyvsp[0].word));}
-#line 1436 "sedml-script.cpp" /* yacc.c:1646  */
+#line 107 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.words) = (yyvsp[0].words);}
+#line 1473 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 107 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].astnode))) YYABORT;}
-#line 1442 "sedml-script.cpp" /* yacc.c:1646  */
+#line 109 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.words) = new vector<const string*>; (yyval.words)->push_back((yyvsp[0].word));}
+#line 1479 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 14:
 #line 110 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.startBlock((yyvsp[-4].words), (yyvsp[-3].astnode))) YYABORT;}
-#line 1448 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.words) = (yyvsp[-2].words); (yyval.words)->push_back((yyvsp[0].word));}
+#line 1485 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 110 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.endBlock()) YYABORT;}
-#line 1454 "sedml-script.cpp" /* yacc.c:1646  */
+#line 113 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addEquals((yyvsp[-2].words), (yyvsp[0].astnode))) YYABORT;}
+#line 1491 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 113 "sedml-script.ypp" /* yacc.c:1646  */
-    {if (g_registry.setName((yyvsp[-2].words), (yyvsp[-1].words), (yyvsp[0].word))) YYABORT;}
-#line 1460 "sedml-script.cpp" /* yacc.c:1646  */
+#line 114 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addSelectedEquals((yyvsp[-5].words), (yyvsp[-3].astnode), (yyvsp[0].astnode))) YYABORT;}
+#line 1497 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 116 "sedml-script.ypp" /* yacc.c:1646  */
+#line 117 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addExecute((yyvsp[-3].words), (yyvsp[-1].astnode))) YYABORT;}
+#line 1503 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 118 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.addExecute((yyvsp[-2].words), NULL)) YYABORT;}
+#line 1509 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 121 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.startBlock((yyvsp[-4].word), (yyvsp[-3].astnode))) YYABORT;}
+#line 1515 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 121 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.endBlock()) YYABORT;}
+#line 1521 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 21:
+#line 122 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.startForInBlock((yyvsp[-5].astnode), (yyvsp[-3].astnode))) YYABORT;}
+#line 1527 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 122 "sedml-script.ypp" /* yacc.c:1646  */
+    {if (g_registry.endBlock()) YYABORT;}
+#line 1533 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 125 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   (yyval.astnode) = new ASTNode(); 
                   (yyval.astnode)->setValue((yyvsp[0].number)); 
                 }
-#line 1469 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1542 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 18:
-#line 120 "sedml-script.ypp" /* yacc.c:1646  */
+  case 24:
+#line 129 "sedml-script.ypp" /* yacc.c:1646  */
     {
                    (yyval.astnode) = new ASTNode();
                    string name = getStringFrom((yyvsp[0].words));
@@ -1484,29 +1557,29 @@ yyreduce:
                      if (g_registry.l3StrCmp(name, "notanumber"))   (yyval.astnode)->setValue(numeric_limits<double>::quiet_NaN());
                    }
                 }
-#line 1488 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1561 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 19:
-#line 134 "sedml-script.ypp" /* yacc.c:1646  */
+  case 25:
+#line 143 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = (yyvsp[-1].astnode);}
-#line 1494 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1567 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 20:
-#line 135 "sedml-script.ypp" /* yacc.c:1646  */
+  case 26:
+#line 144 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = new ASTNode(AST_LOGICAL_XOR); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1500 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1573 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 21:
-#line 136 "sedml-script.ypp" /* yacc.c:1646  */
+  case 27:
+#line 145 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = new ASTNode(AST_POWER); (yyval.astnode)->addChild((yyvsp[-3].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1506 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1579 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 137 "sedml-script.ypp" /* yacc.c:1646  */
+  case 28:
+#line 146 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   if ((yyvsp[-2].astnode)->getType()==AST_TIMES) {
                     (yyval.astnode) = (yyvsp[-2].astnode);
@@ -1518,11 +1591,11 @@ yyreduce:
                     (yyval.astnode)->addChild((yyvsp[0].astnode));
                   }
                 }
-#line 1522 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1595 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 23:
-#line 148 "sedml-script.ypp" /* yacc.c:1646  */
+  case 29:
+#line 157 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   if ((yyvsp[-2].astnode)->getType()==AST_PLUS) {
                     (yyval.astnode) = (yyvsp[-2].astnode);
@@ -1534,17 +1607,17 @@ yyreduce:
                     (yyval.astnode)->addChild((yyvsp[0].astnode));
                   }
                 }
-#line 1538 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1611 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 24:
-#line 159 "sedml-script.ypp" /* yacc.c:1646  */
+  case 30:
+#line 168 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = new ASTNode(AST_DIVIDE); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1544 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1617 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 25:
-#line 160 "sedml-script.ypp" /* yacc.c:1646  */
+  case 31:
+#line 169 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   (yyval.astnode) = new ASTNode(AST_FUNCTION_FLOOR);
                   ASTNode* astn = new ASTNode(AST_DIVIDE);
@@ -1552,93 +1625,93 @@ yyreduce:
                   (yyval.astnode)->addChild((yyvsp[0].astnode));
                   (yyval.astnode)->addChild(astn);
                 }
-#line 1556 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1629 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 26:
-#line 167 "sedml-script.ypp" /* yacc.c:1646  */
+  case 32:
+#line 176 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = new ASTNode(AST_MINUS); (yyval.astnode)->addChild((yyvsp[-2].astnode)); (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1562 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1635 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 27:
-#line 168 "sedml-script.ypp" /* yacc.c:1646  */
+  case 33:
+#line 177 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   (yyval.astnode) = new ASTNode(AST_FUNCTION_REM);
                   (yyval.astnode)->addChild((yyvsp[-2].astnode));
                   (yyval.astnode)->addChild((yyvsp[0].astnode));
                 }
-#line 1572 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 28:
-#line 173 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[0].astnode);}
-#line 1578 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 29:
-#line 174 "sedml-script.ypp" /* yacc.c:1646  */
-    {
-                  (yyval.astnode) = new ASTNode(AST_MINUS);
-                  (yyval.astnode)->addChild((yyvsp[0].astnode));
-                }
-#line 1587 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 30:
-#line 178 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GT);}
-#line 1593 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 31:
-#line 179 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LT);}
-#line 1599 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 32:
-#line 180 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GEQ);}
-#line 1605 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 33:
-#line 181 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LEQ);}
-#line 1611 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1645 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 34:
 #line 182 "sedml-script.ypp" /* yacc.c:1646  */
-    {
-                   (yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_EQ);
-                   (yyval.astnode)->setClass("boolean"); //To distinguish it from '='
-                }
-#line 1620 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[0].astnode);}
+#line 1651 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 186 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
-#line 1626 "sedml-script.cpp" /* yacc.c:1646  */
+#line 183 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                  (yyval.astnode) = new ASTNode(AST_MINUS);
+                  (yyval.astnode)->addChild((yyvsp[0].astnode));
+                }
+#line 1660 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 36:
 #line 187 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
-#line 1632 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GT);}
+#line 1666 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 37:
 #line 188 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
-#line 1638 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-2].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LT);}
+#line 1672 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 38:
 #line 189 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_GEQ);}
+#line 1678 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 39:
+#line 190 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_LEQ);}
+#line 1684 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 40:
+#line 191 "sedml-script.ypp" /* yacc.c:1646  */
+    {
+                   (yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_EQ);
+                   (yyval.astnode)->setClass("boolean"); //To distinguish it from '='
+                }
+#line 1693 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 41:
+#line 195 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1699 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 42:
+#line 196 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1705 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 43:
+#line 197 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = g_registry.combineRelationalElements((yyvsp[-3].astnode), (yyvsp[0].astnode), AST_RELATIONAL_NEQ);}
+#line 1711 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 44:
+#line 198 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   if ((yyvsp[-2].astnode)->getType()==AST_LOGICAL_AND) {
                     (yyval.astnode) = (yyvsp[-2].astnode);
@@ -1650,33 +1723,32 @@ yyreduce:
                     (yyval.astnode)->addChild((yyvsp[0].astnode));
                   }
                 }
-#line 1654 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1727 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 39:
-#line 200 "sedml-script.ypp" /* yacc.c:1646  */
+  case 45:
+#line 209 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   if ((yyvsp[-2].astnode)->getType()==AST_LOGICAL_OR) {
                     (yyval.astnode) = (yyvsp[-2].astnode);
-                    (yyval.astnode)->addChild((yyvsp[0].astnode));
-                  }
+                    (yyval.astnode)->addChild((yyvsp[0].astnode));                  }
                   else {
                     (yyval.astnode) = new ASTNode(AST_LOGICAL_OR);
                     (yyval.astnode)->addChild((yyvsp[-2].astnode));
                     (yyval.astnode)->addChild((yyvsp[0].astnode));
                   }
                 }
-#line 1670 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1742 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 40:
-#line 211 "sedml-script.ypp" /* yacc.c:1646  */
+  case 46:
+#line 219 "sedml-script.ypp" /* yacc.c:1646  */
     {(yyval.astnode) = new ASTNode(AST_LOGICAL_NOT); (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1676 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1748 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 41:
-#line 212 "sedml-script.ypp" /* yacc.c:1646  */
+  case 47:
+#line 220 "sedml-script.ypp" /* yacc.c:1646  */
     {
                    (yyval.astnode) = (yyvsp[-1].astnode);
                    string name = getStringFrom((yyvsp[-3].words));
@@ -1725,11 +1797,11 @@ yyreduce:
                    }
                    if (g_registry.checkNumArguments((yyval.astnode))) YYABORT;
         }
-#line 1729 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1801 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 42:
-#line 260 "sedml-script.ypp" /* yacc.c:1646  */
+  case 48:
+#line 268 "sedml-script.ypp" /* yacc.c:1646  */
     {
                    (yyval.astnode) = new ASTNode(AST_FUNCTION);
                    string name = getStringFrom((yyvsp[-2].words));
@@ -1738,79 +1810,79 @@ yyreduce:
                    if (type != AST_UNKNOWN) (yyval.astnode)->setType(type);
                    if (g_registry.checkNumArguments((yyval.astnode))) YYABORT;
         }
-#line 1742 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1814 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 43:
-#line 268 "sedml-script.ypp" /* yacc.c:1646  */
+  case 49:
+#line 276 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   (yyval.astnode) = new ASTNode();
                   (yyval.astnode)->setType(AST_LINEAR_ALGEBRA_SELECTOR);
                   (yyval.astnode)->addChild((yyvsp[-3].astnode));
                   (yyval.astnode)->addChild((yyvsp[-1].astnode));
                 }
-#line 1753 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1825 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 44:
-#line 274 "sedml-script.ypp" /* yacc.c:1646  */
+  case 50:
+#line 282 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   sed_yyerror("Illegal to define empty square brackets as a selector.");
                   YYABORT;
                 }
-#line 1762 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 45:
-#line 286 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[0].astnode);}
-#line 1768 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 46:
-#line 289 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = new ASTNode(AST_LINEAR_ALGEBRA_VECTOR);}
-#line 1774 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 47:
-#line 290 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[-1].astnode); (yyval.astnode)->setType(AST_LINEAR_ALGEBRA_VECTOR);}
-#line 1780 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 48:
-#line 291 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = new ASTNode(AST_SET_THEORY_SET);}
-#line 1786 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 49:
-#line 292 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[-1].astnode); (yyval.astnode)->setType(AST_SET_THEORY_SET);}
-#line 1792 "sedml-script.cpp" /* yacc.c:1646  */
-    break;
-
-  case 50:
-#line 293 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[-1].astnode); }
-#line 1798 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1834 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 296 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = new ASTNode(AST_FUNCTION); (yyval.astnode)->addChild((yyvsp[0].astnode)); }
-#line 1804 "sedml-script.cpp" /* yacc.c:1646  */
+#line 294 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[0].astnode);}
+#line 1840 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 52:
 #line 297 "sedml-script.ypp" /* yacc.c:1646  */
-    {(yyval.astnode) = (yyvsp[-2].astnode);  (yyval.astnode)->addChild((yyvsp[0].astnode));}
-#line 1810 "sedml-script.cpp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_LINEAR_ALGEBRA_VECTOR);}
+#line 1846 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
   case 53:
 #line 298 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-1].astnode); (yyval.astnode)->setType(AST_LINEAR_ALGEBRA_VECTOR);}
+#line 1852 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 54:
+#line 299 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_SET_THEORY_SET);}
+#line 1858 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 55:
+#line 300 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-1].astnode); (yyval.astnode)->setType(AST_SET_THEORY_SET);}
+#line 1864 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 56:
+#line 301 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-1].astnode); }
+#line 1870 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 57:
+#line 304 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = new ASTNode(AST_FUNCTION); (yyval.astnode)->addChild((yyvsp[0].astnode)); }
+#line 1876 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 58:
+#line 305 "sedml-script.ypp" /* yacc.c:1646  */
+    {(yyval.astnode) = (yyvsp[-2].astnode);  (yyval.astnode)->addChild((yyvsp[0].astnode));}
+#line 1882 "sedml-script.cpp" /* yacc.c:1646  */
+    break;
+
+  case 59:
+#line 306 "sedml-script.ypp" /* yacc.c:1646  */
     {
                   (yyval.astnode) = (yyvsp[-4].astnode);
                   ASTNode* astn = new ASTNode(AST_RELATIONAL_EQ);
@@ -1819,11 +1891,11 @@ yyreduce:
                   astn->addChild((yyvsp[0].astnode));
                   (yyval.astnode)->addChild(astn);
                 }
-#line 1823 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1895 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 54:
-#line 308 "sedml-script.ypp" /* yacc.c:1646  */
+  case 60:
+#line 316 "sedml-script.ypp" /* yacc.c:1646  */
     { 
                   (yyval.astnode) = new ASTNode(AST_SET_THEORY_SET);
                   (yyval.astnode)->setClass("dictionary");
@@ -1835,11 +1907,11 @@ yyreduce:
                   eq->addChild((yyvsp[0].astnode));
                   (yyval.astnode)->addChild(eq);
                 }
-#line 1839 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1911 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
-  case 55:
-#line 319 "sedml-script.ypp" /* yacc.c:1646  */
+  case 61:
+#line 327 "sedml-script.ypp" /* yacc.c:1646  */
     { 
                   (yyval.astnode) = (yyvsp[-4].astnode);
                   ASTNode* eq = new ASTNode(AST_RELATIONAL_EQ);
@@ -1850,11 +1922,11 @@ yyreduce:
                   eq->addChild((yyvsp[0].astnode));
                   (yyval.astnode)->addChild(eq);
                 }
-#line 1854 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1926 "sedml-script.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1858 "sedml-script.cpp" /* yacc.c:1646  */
+#line 1930 "sedml-script.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2082,7 +2154,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 331 "sedml-script.ypp" /* yacc.c:1906  */
+#line 339 "sedml-script.ypp" /* yacc.c:1906  */
 
 
 
@@ -2244,6 +2316,15 @@ int sed_yylex(void)
     if (word == "not") {
       return NOTWORD;
     }
+    if (word == "for") {
+      return FORWORD;
+    }
+    if (word == "in") {
+      return INWORD;
+    }
+    if (word == "if") {
+      return IFWORD;
+    }
     sed_yylval.word = g_registry.addWord(word);
     //cout << "\tRead word '" << word << "'." << endl;
     if (word == "vs" && g_registry.input->peek() == '.') {
@@ -2327,20 +2408,23 @@ int sed_yylex(void)
   }
 
   //Parse text strings
-  if (cc == '"') {
+  if (cc == '"' || cc=='\'') {
     string textstring;
     long ccount = 0;
+    char match = cc;
+    textstring += match;
     g_registry.input->get(cc);
-    while (cc != '"' && cc != '\r' && cc != '\n' && !g_registry.input->eof()) {
+    while (cc != match && cc != '\r' && cc != '\n' && !g_registry.input->eof()) {
       textstring += cc;
       ccount++;
       g_registry.input->get(cc);
     }
+    textstring += match;
     if (cc == '\r' || cc == '\n' || g_registry.input->eof()) {
       for (; ccount > 0; ccount--) {
         g_registry.input->unget();
       }
-      cc = '"';
+      cc = match;
     }
     else {
       sed_yylval.word = g_registry.addWord(textstring);

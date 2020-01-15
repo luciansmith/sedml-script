@@ -139,11 +139,34 @@ bool Registry::addEquals(std::vector<const std::string*>* name, ASTNode* value)
   return false;
 }
 
-bool Registry::startBlock(std::vector<const std::string*>* name, ASTNode* value)
+bool Registry::addSelectedEquals(std::vector<const std::string*>* name, ASTNode * selector, ASTNode * value)
+{
+  Statement statement;
+  statement.setType(stEquals);
+  statement.setTarget(name);
+  statement.setSelector(selector);
+  statement.setFormula(value);
+  addStatement(statement);
+  //  m_statements.push_back(statement);
+  cout << "Parsing an equals line." << endl;
+  return false;
+}
+
+bool Registry::addExecute(std::vector<const std::string*>* name, ASTNode* value)
+{
+  Statement statement;
+  statement.setType(stExecute);
+  statement.setTarget(name);
+  statement.setFormula(value);
+  addStatement(statement);
+  //  m_statements.push_back(statement);
+  cout << "Parsing an 'execute' line." << endl;
+  return false;
+}
+
+bool Registry::startBlock(ASTNode* value, block_type btype)
 {
   cout << "Parsing a start block." << endl;
-  string namestr = getStringFrom(name);
-  block_type btype = getBlockTypeFrom(namestr);
   Statement statement;
   switch (btype) {
   case btDef:
@@ -163,6 +186,17 @@ bool Registry::startBlock(std::vector<const std::string*>* name, ASTNode* value)
   }
   }
   statement.setFormula(value);
+  startBlock(statement);
+  return false;
+}
+
+bool Registry::startForInBlock(ASTNode* variables, ASTNode* from)
+{
+  cout << "Parsing the start of a for loop." << endl;
+  Statement statement;
+  statement.setType(stBlockFor);
+  statement.setSelector(variables);
+  statement.setFormula(from);
   startBlock(statement);
   return false;
 }
