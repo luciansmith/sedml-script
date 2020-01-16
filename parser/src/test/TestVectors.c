@@ -79,7 +79,6 @@ START_TEST (test_equals_set_equals)
 }
 END_TEST
 
-
 START_TEST (test_equals_dict_equals)
 {
   compareStringTranslation("test = {x: pl == 3, z: x1 == x2}", "eq_dict_equals");

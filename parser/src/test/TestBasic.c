@@ -133,6 +133,24 @@ START_TEST (test_select_subvar)
 }
 END_TEST
 
+START_TEST (test_func_subvar)
+{
+  compareStringTranslation("bar(x).foo()", "func_subvar");
+}
+END_TEST
+
+START_TEST (test_func_select_subvar)
+{
+  compareStringTranslation("bar(x)[foo]()", "func_select_subvar");
+}
+END_TEST
+
+START_TEST (test_multi_func_subvar)
+{
+  compareStringTranslation("bar[foo](1, 3, 5)", "multi_func_subvar");
+}
+END_TEST
+
 
 Suite *
 create_suite_Basic (void)
@@ -143,6 +161,9 @@ create_suite_Basic (void)
 
   tcase_add_test( tcase, test_execute_subvar);
   tcase_add_test( tcase, test_select_subvar);
+  tcase_add_test( tcase, test_func_subvar);
+  tcase_add_test( tcase, test_func_select_subvar);
+  tcase_add_test( tcase, test_multi_func_subvar);
 
   tcase_add_test( tcase, test_equals_num);
   tcase_add_test( tcase, test_equals_val);

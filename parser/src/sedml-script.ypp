@@ -60,7 +60,7 @@
 }
 
 //%type   <words>         varOrKeyword
-%type   <astnode>       varOrKeyword node nodelist vector nodecolonlist
+%type   <astnode>       node nodelist vector nodecolonlist
 
 %left ANDWORD ORWORD         /* Boolean functions and, or */
 %left '<' '>' '=' '!' /* Boolean comparison functions (gt, lt, eq, etc.) */
@@ -70,6 +70,7 @@
 %right '^'            /* exponentiation        */
 %left '['
 %left '('
+%left '.'
 
 %token YYEOF 0 "end of file"
 %token  <number> NUM "number"
@@ -107,41 +108,6 @@ lineend:        '\n' {}
         |       ';' {}
         ;
 
-varOrKeyword:   SEDWORD {
-                   $$ = new ASTNode();
-                   $$->setName($1->c_str());
-                   //The symbol is not used in any other mathematical context in the SBML model, so we can see if it matches a list of pre-defined names
-                   ASTNodeType_t type = g_registry.getSymbolFor(*$1);
-                   if (type != AST_UNKNOWN) $$->setType(type);
-                   if (type==AST_REAL) {
-                     if (g_registry.l3StrCmp(*$1, "inf"))          $$->setValue(numeric_limits<double>::infinity());
-                     if (g_registry.l3StrCmp(*$1, "infinity"))     $$->setValue(numeric_limits<double>::infinity());
-                     if (g_registry.l3StrCmp(*$1, "nan"))          $$->setValue(numeric_limits<double>::quiet_NaN());
-                     if (g_registry.l3StrCmp(*$1, "notanumber"))   $$->setValue(numeric_limits<double>::quiet_NaN());
-                   }
-                }
-        |       varOrKeyword '.' SEDWORD {
-                  $$ = new ASTNode();
-                  $$->setType(AST_LINEAR_ALGEBRA_SELECTOR);
-                  $$->setClass("byDot");
-                  $$->addChild($1);
-                  ASTNode* subvar = new ASTNode();
-                  subvar->setName($3->c_str());
-                  $$->addChild(subvar);
-                }
-        |       varOrKeyword '[' node ']' {
-                  $$ = new ASTNode();
-                  $$->setType(AST_LINEAR_ALGEBRA_SELECTOR);
-                  $$->setClass("byBrackets");
-                  $$->addChild($1);
-                  $$->addChild($3);
-                }
-        |       varOrKeyword '[' ']' {
-                  sed_yyerror("Illegal to define empty square brackets as a selector.");
-                  YYABORT;
-                }
-        ;
-
 equals:         node '=' node        {if (g_registry.addEquals($1, $3)) YYABORT;}
         ;
 
@@ -159,7 +125,39 @@ node:           NUM {
                   $$ = new ASTNode(); 
                   $$->setValue($1); 
                 }
-        |       varOrKeyword { $$ = $1;}
+        |       SEDWORD {
+                   $$ = new ASTNode();
+                   $$->setName($1->c_str());
+                   //The symbol is not used in any other mathematical context in the SBML model, so we can see if it matches a list of pre-defined names
+                   ASTNodeType_t type = g_registry.getSymbolFor(*$1);
+                   if (type != AST_UNKNOWN) $$->setType(type);
+                   if (type==AST_REAL) {
+                     if (g_registry.l3StrCmp(*$1, "inf"))          $$->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(*$1, "infinity"))     $$->setValue(numeric_limits<double>::infinity());
+                     if (g_registry.l3StrCmp(*$1, "nan"))          $$->setValue(numeric_limits<double>::quiet_NaN());
+                     if (g_registry.l3StrCmp(*$1, "notanumber"))   $$->setValue(numeric_limits<double>::quiet_NaN());
+                   }
+                }
+        |       node '.' SEDWORD {
+                  $$ = new ASTNode();
+                  $$->setType(AST_LINEAR_ALGEBRA_SELECTOR);
+                  $$->setClass("byDot");
+                  $$->addChild($1);
+                  ASTNode* subvar = new ASTNode();
+                  subvar->setName($3->c_str());
+                  $$->addChild(subvar);
+                }
+        |       node '[' node ']' {
+                  $$ = new ASTNode();
+                  $$->setType(AST_LINEAR_ALGEBRA_SELECTOR);
+                  $$->setClass("byBrackets");
+                  $$->addChild($1);
+                  $$->addChild($3);
+                }
+        |       node '[' ']' {
+                  sed_yyerror("Illegal to define empty square brackets as a selector.");
+                  YYABORT;
+                }
         |       TEXTSTRING {$$ = new ASTNode(); $$->setName($1->c_str());}
         |       '(' node ')'  {$$ = $2;}
         |       node '^' node {$$ = new ASTNode(AST_LOGICAL_XOR); $$->addChild($1); $$->addChild($3);}
