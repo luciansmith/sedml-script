@@ -121,6 +121,18 @@ START_TEST (test_execute_onearg)
 }
 END_TEST
 
+START_TEST (test_execute_subvar)
+{
+  compareStringTranslation("bar[x](foo)", "execute_subvar");
+}
+END_TEST
+
+START_TEST (test_select_subvar)
+{
+  compareStringTranslation("bar[x].foo()", "select_subvar");
+}
+END_TEST
+
 
 Suite *
 create_suite_Basic (void)
@@ -129,7 +141,8 @@ create_suite_Basic (void)
   TCase *tcase = tcase_create("SED-ML Script Basic");
 
 
-  tcase_add_test( tcase, test_execute_onearg);
+  tcase_add_test( tcase, test_execute_subvar);
+  tcase_add_test( tcase, test_select_subvar);
 
   tcase_add_test( tcase, test_equals_num);
   tcase_add_test( tcase, test_equals_val);
@@ -149,6 +162,8 @@ create_suite_Basic (void)
   tcase_add_test( tcase, test_subscript_assignment_var);
   tcase_add_test( tcase, test_subscript_assignment_varsub_if);
   tcase_add_test( tcase, test_subscript_assignment_varsub_for);
+
+  tcase_add_test( tcase, test_execute_onearg);
 
   suite_add_tcase(suite, tcase);
 

@@ -33,21 +33,10 @@ bool Statement::setType(statement_type type)
   return false;
 }
 
-bool Statement::setTarget(vector<string> target)
+bool Statement::setTarget(ASTNode* target)
 {
   m_target = target;
   //Check stuff
-  return false;
-}
-
-bool Statement::setTarget(vector<const string*>* target)
-{
-  if (target == NULL) {
-    return false;
-  }
-  for (size_t tnum = 0; tnum < (*target).size(); tnum++) {
-    m_target.push_back(*(*target)[tnum]);
-  }
   return false;
 }
 
@@ -84,18 +73,12 @@ string Statement::getSedmlScript(string indent)
   ret += indent;
   switch (m_type) {
   case stEquals:
-    ret += getStringFrom(&m_target);
-    if (m_selector != NULL) {
-      ret += '[';
-      ret += SBML_formulaToL3StringWithSettings(m_selector, &l3ps);
-      ret += ']';
-    }
+    ret += SBML_formulaToL3StringWithSettings(m_target, &l3ps);
     ret += " = ";
     ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
     ret += "\n";
     return ret;
   case stExecute:
-    ret += getStringFrom(&m_target);
     ret += SBML_formulaToL3StringWithSettings(m_formula, &l3ps);
     ret += "\n";
     return ret;
@@ -129,6 +112,20 @@ string Statement::getSedmlScript(string indent)
       ret += m_statements[snum].getSedmlScript(indent);
     }
     return ret;
+  case stBlockElse:
+    ret += "else:\n";
+    indent += g_registry.getIndent();
+    for (size_t snum = 0; snum < m_statements.size(); snum++) {
+      ret += m_statements[snum].getSedmlScript(indent);
+    }
+    return ret;
+  case stBlockElif:
+    ret += "elif:\n";
+    indent += g_registry.getIndent();
+    for (size_t snum = 0; snum < m_statements.size(); snum++) {
+      ret += m_statements[snum].getSedmlScript(indent);
+    }
+    return ret;
   default:
     assert(false);
     return ret + "\n";
@@ -140,7 +137,15 @@ statement_type Statement::getType() const
   return m_type;
 }
 
-vector<string> Statement::getTarget() const
+statement_type Statement::getLastChildType() const
+{
+  if (m_statements.size() == 0) {
+    return stUnknown;
+  }
+  return m_statements[m_statements.size() - 1].getType();
+}
+
+ASTNode* Statement::getTarget() const
 {
   return m_target;
 }

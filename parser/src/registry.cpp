@@ -127,11 +127,11 @@ char* Registry::convertFile(const string& filename)
   return ret;
 }
 
-bool Registry::addEquals(std::vector<const std::string*>* name, ASTNode* value)
+bool Registry::addEquals(ASTNode* target, ASTNode* value)
 {
   Statement statement;
   statement.setType(stEquals);
-  statement.setTarget(name);
+  statement.setTarget(target);
   statement.setFormula(value);
   addStatement(statement);
 //  m_statements.push_back(statement);
@@ -139,24 +139,10 @@ bool Registry::addEquals(std::vector<const std::string*>* name, ASTNode* value)
   return false;
 }
 
-bool Registry::addSelectedEquals(std::vector<const std::string*>* name, ASTNode * selector, ASTNode * value)
-{
-  Statement statement;
-  statement.setType(stEquals);
-  statement.setTarget(name);
-  statement.setSelector(selector);
-  statement.setFormula(value);
-  addStatement(statement);
-  //  m_statements.push_back(statement);
-  cout << "Parsing an equals line." << endl;
-  return false;
-}
-
-bool Registry::addExecute(std::vector<const std::string*>* name, ASTNode* value)
+bool Registry::addExecute(ASTNode* value)
 {
   Statement statement;
   statement.setType(stExecute);
-  statement.setTarget(name);
   statement.setFormula(value);
   addStatement(statement);
   //  m_statements.push_back(statement);
@@ -178,9 +164,14 @@ bool Registry::startBlock(ASTNode* value, block_type btype)
   case btIf:
     statement.setType(stBlockIf);
     break;
+  case btElif:
+  case btElse:
+    if (lastNotIf()) {
+      return true;
+    }
   case btUnknown:
   {
-    string err = "Invalid syntax:  Unable to define a block with '" + namestr + "' and a colon: the only legal keywords are 'for', 'if' and 'def'.";
+    string err = "Invalid syntax:  The only legal keywords to start a code block are 'for', 'if' and 'def'.";
     setError(err, sed_yylloc_last_line);
     return true;
   }
@@ -190,7 +181,25 @@ bool Registry::startBlock(ASTNode* value, block_type btype)
   return false;
 }
 
-bool Registry::startForInBlock(ASTNode* variables, ASTNode* from)
+bool Registry::startElseBlock()
+{
+  cout << "Parsing an else block." << endl;
+  //Error checking:
+  if (lastNotIf()) {
+    return true;
+  }
+  Statement statement;
+  statement.setType(stBlockElse);
+  startBlock(statement);
+  return false;
+}
+
+bool Registry::startElifBlock()
+{
+  return false;
+}
+
+bool Registry::startForBlock(ASTNode* variables, ASTNode* from)
 {
   cout << "Parsing the start of a for loop." << endl;
   Statement statement;
@@ -215,7 +224,7 @@ bool Registry::endBlock()
   return false;
 }
 
-bool Registry::isDef(std::vector<const std::string*>* name) const
+bool Registry::isDef(const std::string& name) const
 {
   return false;
 }
@@ -556,6 +565,22 @@ void Registry::addStatement(const Statement & statement)
 void Registry::startBlock(const Statement & statement)
 {
   m_currStatements.push_back(statement);
+}
+
+bool Registry::lastNotIf()
+{
+  string err = "Illegal to define 'else' or 'elif' without an 'if'.";
+  if (m_currStatements.size() == 0) {
+    setError(err, sed_yylloc_last_line);
+    return true;
+  }
+  statement_type lasttype = m_currStatements[m_currStatements.size() - 1].getLastChildType();
+  if (lasttype != stBlockIf && lasttype != stBlockElif) {
+    setError(err, sed_yylloc_last_line);
+    return true;
+  }
+
+  return false;
 }
 
 //Useful functions for later routines:

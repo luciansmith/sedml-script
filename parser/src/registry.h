@@ -63,14 +63,15 @@ public:
   int getErrorLine() {return m_errorLine;};
   std::vector<std::string> getScriptWarnings() {return m_warnings;};
 
-  bool addEquals(std::vector<const std::string*>* name, ASTNode* value);
-  bool addSelectedEquals(std::vector<const std::string*>* name, ASTNode* selector, ASTNode* value);
-  bool addExecute(std::vector<const std::string*>* name, ASTNode* value);
-  bool startBlock(std::vector<const std::string*>* name, ASTNode* value);
-  bool startForInBlock(ASTNode * variables, ASTNode * from);
+  bool addEquals(ASTNode* target, ASTNode* value);
+  bool addExecute(ASTNode* value);
+  bool startBlock(ASTNode* value, block_type btype);
+  bool startElseBlock();
+  bool startElifBlock();
+  bool startForBlock(ASTNode * variables, ASTNode * from);
   bool endBlock();
 
-  bool isDef(std::vector<const std::string*>* name) const;
+  bool isDef(const std::string& name) const;
 
   //Setting the 'name' attribute
   bool setName(std::vector<const std::string*>* id, std::vector<const std::string*>* is, const std::string* name);
@@ -113,6 +114,8 @@ private:
 
   void addStatement(const Statement& statement);
   void startBlock(const Statement& statement);
+
+  bool lastNotIf();
 
 
 

@@ -15,7 +15,7 @@
  * - btDef: Function definition.
  * - btUnknown: An unknown or illegal block definition keyword.
  */
-enum statement_type {stEquals, stExecute, stBlockFor, stBlockIf, stBlockDef, stUnknown};
+enum statement_type {stEquals, stExecute, stBlockFor, stBlockIf, stBlockElse, stBlockElif, stBlockDef, stUnknown};
 
 
   
@@ -27,7 +27,7 @@ enum statement_type {stEquals, stExecute, stBlockFor, stBlockIf, stBlockDef, stU
  * - btDef: Function definition.
  * - btUnknown: An unknown or illegal block definition keyword.
  */
-enum block_type {btFor = 0, btIf, btDef, btUnknown};
+enum block_type {btFor = 0, btIf, btElif, btElse, btDef, btUnknown};
 
 /**
  * python_library defines the programming environments that this library knows about
