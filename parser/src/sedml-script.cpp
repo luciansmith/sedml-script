@@ -1868,12 +1868,12 @@ yyreduce:
                          if ((yyval.astnode)->getNumChildren() == 1) {
                            (yyval.astnode)->setType(AST_FUNCTION_LN);
                          }
-                       }
-                       else if (type==AST_FUNCTION_LOG && (yyval.astnode)->getNumChildren()==2) {
-                         //Swap the arguments for MathML: SBML's infix has "log(10, 3)", but Python has "log(3, 10)".
-                        ASTNode* moveme = (yyval.astnode)->getChild(0);
-                        (yyval.astnode)->removeChild(0);
-                         (yyval.astnode)->addChild(moveme);
+                         else if ((yyval.astnode)->getNumChildren()==2) {
+                           //Swap the arguments for MathML: SBML's infix has "log(10, 3)", but Python has "log(3, 10)".
+                           ASTNode* moveme = (yyval.astnode)->getChild(0);
+                           (yyval.astnode)->removeChild(0);
+                           (yyval.astnode)->addChild(moveme);
+                         }
                        }
                      }
                      if (g_registry.checkNumArguments((yyval.astnode))) YYABORT;

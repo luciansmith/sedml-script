@@ -30,7 +30,7 @@ void testError(const string& base, const string& err)
 
 START_TEST (test_model_err1)
 {
-  testError("sbml_model = mod \"sbml_model.xml\"", "Unable to parse line 1 ('sbml_model = mod \"sbml_model.xml\"'): the only type of phraSED-ML content that fits the syntax '[ID] = [keyword] \"[string]\"' is model definitions, where 'keyword' is the word 'model' (i.e. 'mod1 = model \"file.xml\"').");
+  testError("sbml_model = mod \"sbml_model.xml\"", "Error in line 1: syntax error, unexpected text string in quotes, expecting '\\n' or ';'");
 }
 END_TEST
 

@@ -1,6 +1,6 @@
 /**
- * \file    TestBasic.c
- * \brief   Test parsing Basic in phraSEDML's constructs.
+ * \file    TestVectors.c
+ * \brief   Test parsing vectors from SED-ML script.
  * \author  Lucian Smith
  * ---------------------------------------------------------------------- -->*/
 

@@ -25,6 +25,9 @@ private:
   std::vector<Statement>   m_currStatements;
 
   std::set<ASTNodeType_t>  m_usedNodes;
+  bool                     m_hasSqrt;
+  bool                     m_hasRoot;
+  bool                     m_hasLog10;
   bool                     m_hasInf;
   bool                     m_hasNaN;
   python_library           m_python_library;

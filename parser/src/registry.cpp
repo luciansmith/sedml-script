@@ -34,6 +34,9 @@ Registry::Registry()
   , m_statements()
   , m_currStatements()
   , m_usedNodes()
+  , m_hasSqrt(false)
+  , m_hasRoot(false)
+  , m_hasLog10(false)
   , m_hasInf(false)
   , m_hasNaN(false)
   , m_python_library(pl_roadrunner)
@@ -136,6 +139,8 @@ bool Registry::addEquals(ASTNode* target, ASTNode* value)
   addStatement(statement);
 //  m_statements.push_back(statement);
   cout << "Parsing an equals line." << endl;
+  addNodesFrom(target);
+  addNodesFrom(value);
   return false;
 }
 
@@ -147,6 +152,7 @@ bool Registry::addExecute(ASTNode* value)
   addStatement(statement);
   //  m_statements.push_back(statement);
   cout << "Parsing an 'execute' line." << endl;
+  addNodesFrom(value);
   return false;
 }
 
@@ -178,6 +184,7 @@ bool Registry::startBlock(ASTNode* value, block_type btype)
   }
   statement.setFormula(value);
   startBlock(statement);
+  addNodesFrom(value);
   return false;
 }
 
@@ -269,6 +276,23 @@ void Registry::addNodesFrom(ASTNode * node)
   if (node->isNaN()) {
     m_hasNaN = true;
   }
+  if (type == AST_FUNCTION_ROOT) {
+    if (node->isSqrt()) {
+      m_hasSqrt = true;
+    }
+    else {
+      m_hasRoot = true;
+    }
+  }
+  if (type == AST_FUNCTION_LOG) {
+    if (node->isLog10()) {
+      m_hasLog10 = true;
+    }
+    else {
+      //'ln' in python is 'log'; so is 'log(x, base)'
+      m_usedNodes.insert(AST_FUNCTION_LN);
+    }
+  }
 }
 
 bool Registry::finalize()
@@ -329,6 +353,7 @@ void Registry::createPython()
   string mpmathline = "from mpmath import";
   string avogadroline = "";
   string piecewise = "";
+  string root = "";
   for (set<ASTNodeType_t>::iterator type = m_usedNodes.begin(); type != m_usedNodes.end(); type++) {
     switch (*type) {
     case AST_NAME_AVOGADRO:
@@ -347,7 +372,7 @@ void Registry::createPython()
       mathline += ", acosh";
       break;
     case AST_FUNCTION_ARCCOT:
-      mathline += ", acot";
+      mpmathline += ", acot";
       break;
     case AST_FUNCTION_ARCCOTH:
       mpmathline += ", acoth";
@@ -407,7 +432,6 @@ void Registry::createPython()
       mathline += ", floor";
       break;
     case AST_FUNCTION_LN:
-    case AST_FUNCTION_LOG:
       mathline += ", log";
       break;
     case AST_FUNCTION_SEC:
@@ -439,6 +463,9 @@ void Registry::createPython()
         "        return args[-1]\n"
         "    return None\n";
       break;
+    case AST_FUNCTION_ROOT:
+      //Handle sqrt and root separately.
+      break;
     }
   }
   if (m_hasInf) {
@@ -447,12 +474,23 @@ void Registry::createPython()
   if (m_hasNaN) {
     mathline += ", nan as NaN";
   }
+  if (m_hasSqrt) {
+    mathline += ", sqrt";
+  }
+  if (m_hasLog10) {
+    mathline += ", log10";
+  }
+  if (m_hasRoot) {
+    root =
+      "def root(n, a):\n"
+      "  return a**(1.0/n)\n";
+  }
   if (mathline.find("import,") != string::npos) {
-    mathline.replace(17, 1, "");
+    mathline.replace(16, 1, "");
     m_python_header += mathline + "\n";
   }
   if (mpmathline.find("import,") != string::npos) {
-    mpmathline.replace(19, 1, "");
+    mpmathline.replace(18, 1, "");
     m_python_header += mpmathline + "\n";
   }
   if (avogadroline.size() > 0) {
@@ -461,6 +499,10 @@ void Registry::createPython()
   if (piecewise.size() > 0) {
     m_python_header += "\n";
     m_python_header += piecewise + "\n";
+  }
+  if (root.size() > 0) {
+    m_python_header += "\n";
+    m_python_header += root + "\n";
   }
 
 
@@ -537,6 +579,9 @@ void Registry::clearAll()
   m_currStatements.clear();
   m_statements.clear();
   m_usedNodes.clear();
+  m_hasSqrt = false;
+  m_hasRoot = false;
+  m_hasLog10 = false;
   m_hasInf = false;
   m_hasNaN = false;
 }

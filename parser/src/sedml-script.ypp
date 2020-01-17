@@ -276,12 +276,12 @@ node:           NUM {
                          if ($$->getNumChildren() == 1) {
                            $$->setType(AST_FUNCTION_LN);
                          }
-                       }
-                       else if (type==AST_FUNCTION_LOG && $$->getNumChildren()==2) {
-                         //Swap the arguments for MathML: SBML's infix has "log(10, 3)", but Python has "log(3, 10)".
-                        ASTNode* moveme = $$->getChild(0);
-                        $$->removeChild(0);
-                         $$->addChild(moveme);
+                         else if ($$->getNumChildren()==2) {
+                           //Swap the arguments for MathML: SBML's infix has "log(10, 3)", but Python has "log(3, 10)".
+                           ASTNode* moveme = $$->getChild(0);
+                           $$->removeChild(0);
+                           $$->addChild(moveme);
+                         }
                        }
                      }
                      if (g_registry.checkNumArguments($$)) YYABORT;
